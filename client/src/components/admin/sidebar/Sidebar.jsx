@@ -40,6 +40,12 @@ const Sidebar = () => {
           badge: '200+',
         },
         {
+          icon: '📝',
+          label: 'Blog Posts',
+          href: '/dashboard/blog',
+          badge: '12',
+        },
+        {
           icon: '➕',
           label: 'Add Scholarship',
           href: '/dashboard/add-scholarships',
@@ -88,35 +94,7 @@ const Sidebar = () => {
         },
       ],
     },
-    {
-      title: 'CONTENT',
-      items: [
-        {
-          icon: '📝',
-          label: 'Blog Posts',
-          href: '/dashboard/blog',
-          badge: '12',
-        },
-        {
-          icon: '❓',
-          label: 'FAQs',
-          href: '/dashboard/faq',
-          badge: null,
-        },
-        {
-          icon: '📞',
-          label: 'Contact Messages',
-          href: '/dashboard/contacts',
-          badge: '8',
-        },
-        {
-          icon: '🌟',
-          label: 'Testimonials',
-          href: '/dashboard/testimonials',
-          badge: '23',
-        },
-      ],
-    },
+
     {
       title: 'SETTINGS',
       items: [
@@ -145,14 +123,11 @@ const Sidebar = () => {
   const isActive = href => pathname === href;
 
   return (
-    <div className="bg-gradient-to-b from-gray-900 to-gray-800 text-white w-64 h-screen flex flex-col">
+    <div className="bg-gradient-to-b from-gray-900 to-gray-800 text-white w-64 h-full flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-gray-700 flex-shrink-0">
+      <div className="py-4 pl-2 border-b border-gray-700 flex-shrink-0">
         <Link href="/" className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-lg">✈️</span>
-          </div>
-          <div>
+          <div className="hidden lg:block">
             <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
               Global Scholarships
             </h1>
@@ -162,7 +137,7 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation (Scrollable part) */}
-      <nav className="flex-1 overflow-y-scroll py-6 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-80">
+      <nav className="flex-1 overflow-y-auto py-6 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-800">
         {menuItems.map(section => (
           <div key={section.title} className="mb-8">
             <h3 className="px-6 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -175,7 +150,7 @@ const Sidebar = () => {
                     href={item.href}
                     className={`flex items-center justify-between px-6 py-3 text-sm transition-all duration-200 group ${
                       isActive(item.href)
-                        ? 'bg-blue-600 text-white shadow-lg border-r-4 border-cyan-400'
+                        ? 'bg-blue-600 text-white shadow-lg border-l-4 border-cyan-400'
                         : 'text-gray-300 hover:bg-gray-750 hover:text-white'
                     }`}
                   >
@@ -203,12 +178,12 @@ const Sidebar = () => {
       </nav>
 
       {/* Footer */}
-      <div className="p-6 border-t border-gray-700 flex-shrink-0">
+      <div className="p-4 md:p-6 border-t border-gray-700 flex-shrink-0">
         <div className="flex items-center space-x-3 p-3 bg-gray-750 rounded-lg">
           <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-400 rounded-full flex items-center justify-center">
             <span className="text-white text-sm font-bold">A</span>
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 hidden md:block">
             <p className="text-sm font-medium text-white truncate">
               Admin User
             </p>

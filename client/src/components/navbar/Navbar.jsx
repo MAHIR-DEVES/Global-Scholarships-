@@ -1,6 +1,4 @@
-// components/Navbar.jsx
 'use client';
-
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
@@ -11,12 +9,23 @@ const Navbar = ({ className }) => {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
   const navLinks = [
-    { name: 'Scholarships', href: '/scholarships', icon: '🎓' },
+    {
+      name: 'Scholarships',
+      href: '/scholarships',
+      icon: '🎓',
+      submenu: [
+        { name: 'Gov. Scholarships', href: '/gov-scholarship' },
+        { name: 'Master', href: '/scholarships/master' },
+        { name: 'PhD', href: '/scholarships/phd' },
+      ],
+    },
     { name: 'Upcoming', href: '/upcoming', icon: '📅' },
-    { name: 'Gov. Scholarships', href: '/gov-scholarship', icon: '🏛️' },
-    { name: 'SOP & IELTS', href: '/sop-&-ielts', icon: '📝' },
+    { name: 'SOP ', href: '/sop', icon: '🏛️' },
+    { name: 'IELTS', href: '/ielts', icon: '📝' },
+    { name: 'Blog', href: '/blog', icon: '📰' },
   ];
 
   const handleLoginClick = () => {
@@ -31,6 +40,7 @@ const Navbar = ({ className }) => {
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
+    setActiveDropdown(null);
   };
 
   return (
@@ -43,7 +53,7 @@ const Navbar = ({ className }) => {
         className
       )}
     >
-      <div className="max-w-7xl mx-auto pl-3 lg:px-0 ">
+      <div className="max-w-7xl mx-auto pl-3 lg:px-0">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <motion.div
@@ -75,6 +85,9 @@ const Navbar = ({ className }) => {
             {navLinks.map((link, index) => (
               <motion.div
                 key={link.name}
+                className="relative"
+                onMouseEnter={() => setActiveDropdown(link.name)}
+                onMouseLeave={() => setActiveDropdown(null)}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
@@ -90,18 +103,29 @@ const Navbar = ({ className }) => {
                 >
                   <span className="text-lg">{link.icon}</span>
                   <span>{link.name}</span>
-                  {pathname === link.href && (
-                    <motion.div
-                      layoutId="activePill"
-                      className="absolute inset-0 bg-blue-50 rounded-xl -z-10"
-                      transition={{
-                        type: 'spring',
-                        bounce: 0.2,
-                        duration: 0.6,
-                      }}
-                    />
-                  )}
+                  {link.submenu && <span className="ml-1 text-sm">▼</span>}
                 </Link>
+
+                {/* Dropdown submenu */}
+                {link.submenu && activeDropdown === link.name && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full left-0 mt-2 w-56 bg-white shadow-lg rounded-xl border border-gray-100 z-50"
+                  >
+                    {link.submenu.map(sub => (
+                      <Link
+                        key={sub.name}
+                        href={sub.href}
+                        className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
+                      >
+                        {sub.name}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -179,26 +203,39 @@ const Navbar = ({ className }) => {
             >
               <div className="p-4 space-y-1">
                 {navLinks.map((link, index) => (
-                  <motion.div
-                    key={link.name}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 + 0.1 }}
-                  >
-                    <Link
-                      href={link.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={clsx(
-                        'flex items-center space-x-3 px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200',
-                        pathname === link.href
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      )}
+                  <div key={link.name} className="relative">
+                    <button
+                      onClick={() =>
+                        setActiveDropdown(
+                          activeDropdown === link.name ? null : link.name
+                        )
+                      }
+                      className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-lg font-medium text-gray-700 hover:bg-gray-50"
                     >
-                      <span className="text-xl">{link.icon}</span>
-                      <span>{link.name}</span>
-                    </Link>
-                  </motion.div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">{link.icon}</span>
+                        <span>{link.name}</span>
+                      </div>
+                      {link.submenu && (
+                        <span>{activeDropdown === link.name ? '▲' : '▼'}</span>
+                      )}
+                    </button>
+
+                    {link.submenu && activeDropdown === link.name && (
+                      <div className="ml-6 mt-1 space-y-1">
+                        {link.submenu.map(sub => (
+                          <Link
+                            key={sub.name}
+                            href={sub.href}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="block px-3 py-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                          >
+                            {sub.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
 
                 <div className="pt-4 border-t border-gray-100 space-y-3">
