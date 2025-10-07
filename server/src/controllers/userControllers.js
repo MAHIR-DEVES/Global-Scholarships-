@@ -42,7 +42,10 @@ export const createUser = async (req, res) => {
     });
 
     await user.save();
-    res.status(201).json(user);
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully!',
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

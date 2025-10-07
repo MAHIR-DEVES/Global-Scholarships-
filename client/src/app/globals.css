@@ -1,1 +1,20 @@
 @import 'tailwindcss';
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px; /* scrollbar width */
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937; /* dark gray background (gray-800) */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #3b82f6; /* blue-500 scrollbar thumb */
+  border-radius: 8px;
+  border: 2px solid #1f2937; /* creates a gap effect */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #2563eb; /* darker blue on hover (blue-600) */
+}
