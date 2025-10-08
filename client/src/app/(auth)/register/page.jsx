@@ -4,17 +4,19 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'student',
     phone: '',
     country: '',
-    educationLevel: '',
-    programInterest: '',
+    educationLevel: 'Bachelor',
+    fieldOfStudy: '',
     agreeToTerms: false,
   });
 
@@ -27,6 +29,11 @@ const RegisterPage = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  // Map frontend education level values to backend values
+  const mapEducationLevel = level => {
+    return level; // Now frontend and backend use the same values
   };
 
   const handleSubmit = async e => {
@@ -47,27 +54,52 @@ const RegisterPage = () => {
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { confirmPassword, ...dataToSend } = formData;
 
-      toast.success(
-        'Registration successful! Welcome to Global Scholarships 🎓'
+      // Map frontend education levels to backend values
+      const mappedData = {
+        ...dataToSend,
+        educationLevel: mapEducationLevel(dataToSend.educationLevel),
+      };
+
+      // Send data to backend API
+      const res = await axios.post(
+        'http://localhost:5000/api/users',
+        mappedData,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
       );
+
+      // If success
+      if (res.status === 201 || res.status === 200) {
+        toast.success(
+          'Registration successful! Welcome to Global Scholarships 🎓'
+        );
+        console.log('Data sent to DB:', res.data);
+      }
 
       // Reset form
       setFormData({
-        fullName: '',
+        name: '',
         email: '',
         password: '',
         confirmPassword: '',
         phone: '',
         country: '',
         educationLevel: '',
-        programInterest: '',
+        fieldOfStudy: '',
         agreeToTerms: false,
       });
     } catch (error) {
-      toast.error('Registration failed. Please try again.');
+      console.error(
+        'Registration error:',
+        error.response?.data || error.message
+      );
+      toast.error(
+        error.response?.data?.message ||
+          'Registration failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -90,6 +122,7 @@ const RegisterPage = () => {
     'Bachelor',
     'Master',
     'PhD',
+    'Other',
   ];
   const programInterests = [
     'Business',
@@ -199,17 +232,17 @@ const RegisterPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
-                  htmlFor="fullName"
+                  htmlFor="name"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   Full Name *
                 </label>
                 <input
-                  id="fullName"
-                  name="fullName"
+                  id="name"
+                  name="name"
                   type="text"
                   required
-                  value={formData.fullName}
+                  value={formData.name}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                   placeholder="Enter your full name"
@@ -308,16 +341,16 @@ const RegisterPage = () => {
 
               <div>
                 <label
-                  htmlFor="programInterest"
+                  htmlFor="fieldOfStudy"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   Program Interest *
                 </label>
                 <select
-                  id="programInterest"
-                  name="programInterest"
+                  id="fieldOfStudy"
+                  name="fieldOfStudy"
                   required
-                  value={formData.programInterest}
+                  value={formData.fieldOfStudy}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                 >

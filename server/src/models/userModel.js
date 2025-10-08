@@ -36,8 +36,8 @@ const userSchema = new mongoose.Schema(
     },
     educationLevel: {
       type: String,
-      enum: ['High School', 'Undergraduate', 'Postgraduate', 'PhD', 'Other'],
-      default: 'Undergraduate',
+      enum: ['High School', 'Diploma', 'Bachelor', 'Master', 'PhD', 'Other'],
+      default: 'Bachelor',
     },
     fieldOfStudy: {
       type: String,
