@@ -1,12 +1,12 @@
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
+import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import scholarshipRoutes from "./routes/scholarshipRoutes.js";
 
+// require("dotenv").config();
 dotenv.config();
-
 // Connect to database
 connectDB();
 
@@ -36,6 +36,12 @@ app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Server running on port ${process.env.PORT || 5000}`);
-});
+const PORT = process.env.PORT || 5000;
+
+// Export the app for Vercel
+export default app;
+
+// Start server (only for local development)
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
