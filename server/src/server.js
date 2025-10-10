@@ -18,6 +18,10 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/scholarships', scholarshipRoutes);
 
+// test route
+app.get('/', (req, res) => {
+  res.json({ message: 'API is working!' });
+});
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
