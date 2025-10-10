@@ -6,6 +6,8 @@ import userRoutes from './routes/userRoutes.js';
 import scholarshipRoutes from './routes/scholarshipRoutes.js';
 
 dotenv.config();
+
+// Connect to database
 connectDB();
 
 const app = express();
@@ -20,8 +22,9 @@ app.use('/api/scholarships', scholarshipRoutes);
 
 // test route
 app.get('/', (req, res) => {
-  res.json({ message: 'API is working!' });
+  res.send('API is working!');
 });
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -33,10 +36,13 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 5000;
+// For Vercel deployment, we need to export the app
+export default app;
 
-module.exports = app;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Only start the server if this file is run directly (not imported)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
