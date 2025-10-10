@@ -3,11 +3,26 @@ import Scholarship from '../models/Scholarship.js';
 // 🟢 Create Scholarship
 export const createScholarship = async (req, res) => {
   try {
+    // Validate that we have at least one program
+    if (!req.body.programs || req.body.programs.length === 0) {
+      return res.status(400).json({
+        message: 'At least one program is required',
+      });
+    }
+
+    // Validate that we don't have more than one program (as per requirement)
+    if (req.body.programs.length > 1) {
+      return res.status(400).json({
+        message: 'Only one program is allowed per university',
+      });
+    }
+
     const newScholarship = new Scholarship(req.body);
     const savedScholarship = await newScholarship.save();
     res.status(201).json({
       success: true,
       message: 'Scholarship created successfully!',
+      data: savedScholarship,
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -40,6 +55,20 @@ export const getScholarshipById = async (req, res) => {
 // 🟢 Update Scholarship
 export const updateScholarship = async (req, res) => {
   try {
+    // Validate that we have at least one program
+    if (req.body.programs && req.body.programs.length === 0) {
+      return res.status(400).json({
+        message: 'At least one program is required',
+      });
+    }
+
+    // Validate that we don't have more than one program (as per requirement)
+    if (req.body.programs && req.body.programs.length > 1) {
+      return res.status(400).json({
+        message: 'Only one program is allowed per university',
+      });
+    }
+
     const updatedScholarship = await Scholarship.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -51,6 +80,7 @@ export const updateScholarship = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Scholarship Updated successfully!',
+      data: updatedScholarship,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

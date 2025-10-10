@@ -1,4 +1,5 @@
 'use client';
+import userService from '@/utils/userService';
 import React, { useState, useEffect } from 'react';
 
 const Navbar = ({ onMenuToggle }) => {
@@ -6,6 +7,27 @@ const Navbar = ({ onMenuToggle }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // user info
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  console.log(userProfile?.user);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userData = await userService.getCurrentUser();
+        setUserProfile(userData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   useEffect(() => {
     const updateTime = () => {
@@ -112,7 +134,7 @@ const Navbar = ({ onMenuToggle }) => {
                 Dashboard Overview
               </h2>
               <p className="text-sm text-gray-500 flex items-center space-x-2 mt-1">
-                <span>Welcome back, {user.name}</span>
+                <span>Welcome back, {userProfile?.user?.name}</span>
                 <span>•</span>
                 <span className="flex items-center space-x-1">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -302,9 +324,11 @@ const Navbar = ({ onMenuToggle }) => {
                 </div>
                 <div className="hidden lg:block text-left">
                   <p className="text-sm font-semibold text-gray-900">
-                    {user.name}
+                    {userProfile?.user?.name}
                   </p>
-                  <p className="text-xs text-gray-500">{user.role}</p>
+                  <p className="text-xs text-gray-500">
+                    {userProfile?.user?.role}
+                  </p>
                 </div>
                 <svg
                   className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors hidden lg:block"
@@ -334,13 +358,13 @@ const Navbar = ({ onMenuToggle }) => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-gray-900 truncate">
-                          {user.name}
+                          {userProfile?.user?.name}
                         </p>
                         <p className="text-xs text-gray-600 truncate">
-                          {user.email}
+                          {userProfile?.user?.email}
                         </p>
                         <p className="text-xs text-blue-600 font-medium mt-1">
-                          {user.role}
+                          {userProfile?.user?.role}
                         </p>
                       </div>
                     </div>

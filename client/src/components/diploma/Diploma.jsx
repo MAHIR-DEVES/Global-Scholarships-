@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 const Diploma = () => {
+  const [scholarships, setScholarships] = useState(null);
   const diplomaScholarships = [
     {
       id: 1,
@@ -109,7 +110,24 @@ const Diploma = () => {
       students: 220,
     },
   ];
+  console.log(scholarships);
 
+  useEffect(() => {
+    const fetchScholarships = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/scholarships');
+        if (!res.ok) {
+          throw new Error('Failed to fetch scholarships');
+        }
+        const data = await res.json();
+        setScholarships(data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchScholarships();
+  }, []);
   const [showAll, setShowAll] = useState(false);
 
   const visibleScholarships = showAll

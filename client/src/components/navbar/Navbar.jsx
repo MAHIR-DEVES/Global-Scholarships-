@@ -3,29 +3,70 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import userService from '@/utils/userService';
 
 const Navbar = ({ className }) => {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // user info
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  console.log(userProfile?.user);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userData = await userService.getCurrentUser();
+        setUserProfile(userData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const navLinks = [
     {
       name: 'Scholarships',
-      href: '/scholarships',
+      href: '/#',
       icon: '🎓',
       submenu: [
-        { name: 'Gov. Scholarships', href: '/gov-scholarship' },
-        { name: 'Master', href: '/scholarships/master' },
-        { name: 'PhD', href: '/scholarships/phd' },
+        { name: 'Gov. Scholarships', href: '/scholarships/gov-scholarship' },
+        { name: 'Bachelor', href: '/scholarships/bachelor' },
+        { name: 'Masters', href: '/scholarships/masters' },
+        { name: 'Diploma', href: '/scholarships/diploma' },
+        { name: 'Language', href: '/scholarships/language' },
       ],
     },
+
     { name: 'Upcoming', href: '/upcoming', icon: '📅' },
     { name: 'SOP ', href: '/sop', icon: '🏛️' },
     { name: 'IELTS', href: '/ielts', icon: '📝' },
     { name: 'Blog', href: '/blog', icon: '📰' },
+    {
+      name: 'service',
+      href: '/#',
+      icon: '🛡️',
+      submenu: [
+        {
+          name: 'University Application',
+          href: '/service/university-application',
+        },
+        {
+          name: ' SOP Writing',
+          href: '/service/sop-writing',
+        },
+      ],
+    },
   ];
 
   const handleLoginClick = () => {
@@ -41,6 +82,12 @@ const Navbar = ({ className }) => {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
     setActiveDropdown(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setDropdownOpen(false);
+    router.push('/login');
   };
 
   return (
@@ -95,7 +142,7 @@ const Navbar = ({ className }) => {
                 <Link
                   href={link.href}
                   className={clsx(
-                    'relative flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 group',
+                    'relative flex items-center space-x-2 px-2.5 py-2 rounded-xl font-medium transition-all duration-300 group',
                     pathname === link.href
                       ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-700 hover:text-blue-600'
@@ -113,7 +160,7 @@ const Navbar = ({ className }) => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full left-0 mt-2 w-56 bg-white shadow-lg rounded-xl border border-gray-100 z-50"
+                    className="absolute top-full left-0  w-56 bg-white shadow-lg rounded-xl border border-gray-100 z-50"
                   >
                     {link.submenu.map(sub => (
                       <Link
@@ -131,25 +178,113 @@ const Navbar = ({ className }) => {
           </div>
 
           {/* Desktop Buttons */}
-          <div className="hidden lg:flex items-center space-x-3">
-            <motion.button
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.7, duration: 0.4 }}
-              onClick={handleRegisterClick}
-              className="px-6 py-2.5 font-medium rounded-xl border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 hover:shadow-lg"
-            >
-              Sign up
-            </motion.button>
-            <motion.button
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.8, duration: 0.4 }}
-              onClick={handleLoginClick}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-medium rounded-xl hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              Sign In
-            </motion.button>
+          <div className="hidden lg:flex items-center space-x-3 relative">
+            {userProfile?.user ? (
+              <>
+                {/* Profile Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-gray-300 hover:border-blue-400 transition-all"
+                  >
+                    <img
+                      src={
+                        userProfile?.user?.photoURL ||
+                        'https://i.ibb.co/4pDNDk1/avatar.png'
+                      }
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {dropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50"
+                    >
+                      {/* Menu Items */}
+                      <div className="p-2">
+                        <Link
+                          href="/dashboard"
+                          className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150"
+                        >
+                          <div className="w-5 h-5 text-gray-400">🛡️</div>
+                          <span>Dashboard</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/profile"
+                          className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150"
+                        >
+                          <div className="w-5 h-5 text-gray-400">👤</div>
+                          <span>My Profile</span>
+                        </Link>
+                        <Link
+                          href="/dashboard/settings"
+                          className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150"
+                        >
+                          <div className="w-5 h-5 text-gray-400">⚙️</div>
+                          <span>Account Settings</span>
+                        </Link>
+
+                        <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
+                          <div className="w-5 h-5 text-gray-400">💬</div>
+                          <span>Support Center</span>
+                        </button>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="p-2 border-t border-gray-100">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                        >
+                          <div className="w-5 h-5">
+                            <svg
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                              />
+                            </svg>
+                          </div>
+                          <span>Sign Out</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7, duration: 0.4 }}
+                  onClick={handleRegisterClick}
+                  className="px-6 py-2.5 font-medium rounded-xl border border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all duration-300 hover:shadow-lg"
+                >
+                  Sign up
+                </motion.button>
+
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8, duration: 0.4 }}
+                  onClick={handleLoginClick}
+                  className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-400 text-white font-medium rounded-xl hover:from-blue-600 hover:to-cyan-500 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  Sign In
+                </motion.button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}

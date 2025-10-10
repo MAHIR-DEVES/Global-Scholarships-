@@ -1,10 +1,30 @@
 'use client';
 
-import React, { useState } from 'react';
+import userService from '@/utils/userService';
+import React, { useEffect, useState } from 'react';
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
+
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userData = await userService.getCurrentUser();
+        setUserProfile(userData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   // User profile data
   const [profile, setProfile] = useState({
@@ -158,9 +178,9 @@ const ProfilePage = () => {
                   {profile.avatar}
                 </div>
                 <h2 className="text-xl font-bold text-gray-900">
-                  {profile.name}
+                  {userProfile?.user?.name}
                 </h2>
-                <p className="text-gray-600">{profile.role}</p>
+                <p className="text-gray-600">{userProfile?.user?.role}</p>
                 <p className="text-sm text-gray-500">{profile.department}</p>
               </div>
 
@@ -170,14 +190,18 @@ const ProfilePage = () => {
                   <span className="text-gray-400">📧</span>
                   <div>
                     <p className="text-sm font-medium text-gray-900">Email</p>
-                    <p className="text-sm text-gray-600">{profile.email}</p>
+                    <p className="text-sm text-gray-600">
+                      {userProfile?.user?.email}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <span className="text-gray-400">📱</span>
                   <div>
                     <p className="text-sm font-medium text-gray-900">Phone</p>
-                    <p className="text-sm text-gray-600">{profile.phone}</p>
+                    <p className="text-sm text-gray-600">
+                      {userProfile?.user?.phone}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">

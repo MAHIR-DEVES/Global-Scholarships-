@@ -1,7 +1,7 @@
 import React from 'react';
 
 const page = () => {
-  return <div>pScholarships</div>;
+  return <div>SOP Writing</div>;
 };
 
 export default page;

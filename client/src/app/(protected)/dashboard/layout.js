@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/admin/navbar/Navbar';
 import Sidebar from '@/components/admin/sidebar/Sidebar';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import styles
 
 export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,7 +14,9 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Navbar */}
       <Navbar onMenuToggle={toggleSidebar} />
+
       <div className="flex flex-1">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
@@ -34,11 +38,23 @@ export default function DashboardLayout({ children }) {
           <Sidebar />
         </div>
 
-        {/* Main content area with responsive margin */}
+        {/* Main content area */}
         <main className="flex-1 md:ml-64 p-4 md:p-6 bg-gray-100 overflow-y-auto">
           {children}
         </main>
       </div>
+
+      {/* ✅ Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="light"
+      />
     </div>
   );
 }

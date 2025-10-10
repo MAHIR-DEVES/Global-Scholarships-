@@ -15,7 +15,7 @@ const RegisterPage = () => {
     role: 'student',
     phone: '',
     country: '',
-    educationLevel: 'Bachelor',
+    educationLevel: '',
     fieldOfStudy: '',
     agreeToTerms: false,
   });
@@ -285,6 +285,7 @@ const RegisterPage = () => {
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                   placeholder="+1 234 567 8900"
+                  required
                 />
               </div>
 
@@ -298,7 +299,6 @@ const RegisterPage = () => {
                 <select
                   id="country"
                   name="country"
-                  required
                   value={formData.country}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
@@ -325,7 +325,6 @@ const RegisterPage = () => {
                 <select
                   id="educationLevel"
                   name="educationLevel"
-                  required
                   value={formData.educationLevel}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
@@ -349,7 +348,6 @@ const RegisterPage = () => {
                 <select
                   id="fieldOfStudy"
                   name="fieldOfStudy"
-                  required
                   value={formData.fieldOfStudy}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"

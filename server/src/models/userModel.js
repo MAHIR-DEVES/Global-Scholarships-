@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema(
   {
@@ -36,8 +37,16 @@ const userSchema = new mongoose.Schema(
     },
     educationLevel: {
       type: String,
-      enum: ['High School', 'Diploma', 'Bachelor', 'Master', 'PhD', 'Other'],
-      default: 'Bachelor',
+      enum: [
+        '',
+        'High School',
+        'Diploma',
+        'Bachelor',
+        'Master',
+        'PhD',
+        'Other',
+      ],
+      default: '',
     },
     fieldOfStudy: {
       type: String,
@@ -62,6 +71,25 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// ✅ Pre-save middleware to hash password before saving
+userSchema.pre('save', async function (next) {
+  // Only hash the password if it is new or modified
+  if (!this.isModified('password')) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(10); // generate salt
+    this.password = await bcrypt.hash(this.password, salt); // hash password
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ✅ Method to compare entered password with hashed password
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 const User = mongoose.model('User', userSchema);
 

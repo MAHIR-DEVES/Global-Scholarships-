@@ -28,6 +28,13 @@ const programSchema = new mongoose.Schema({
   additionalInfo: {
     type: String,
   },
+  // Program-level fields
+  feeStructure: {
+    type: String,
+  },
+  scholarshipCover: {
+    type: String,
+  },
 });
 
 const scholarshipSchema = new mongoose.Schema(
@@ -38,7 +45,7 @@ const scholarshipSchema = new mongoose.Schema(
     },
     country: {
       type: String,
-      enum: ['China', 'Malaysia'],
+      enum: ['China', 'Malaysia', 'USA', 'UK', 'Canada', 'Australia'],
       required: [true, 'Country is required'],
     },
     universityLogo: {
@@ -48,11 +55,32 @@ const scholarshipSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Description is required'],
     },
-    programs: [programSchema],
+    programs: {
+      type: [programSchema],
+      required: [true, 'At least one program is required'],
+      validate: {
+        validator: function (programs) {
+          return programs.length >= 1 && programs.length <= 1; // Exactly one program
+        },
+        message: 'A scholarship must have exactly one program',
+      },
+    },
     website: {
       type: String,
     },
     contactEmail: {
+      type: String,
+    },
+    // University-level fields
+    majors: [
+      {
+        type: String,
+      },
+    ],
+    videoUrl: {
+      type: String,
+    },
+    worldRanking: {
       type: String,
     },
   },

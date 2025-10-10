@@ -34,6 +34,12 @@ const Sidebar = () => {
       title: 'SCHOLARSHIPS',
       items: [
         {
+          icon: '➕',
+          label: 'Add Scholarship',
+          href: '/dashboard/add-scholarships',
+          badge: null,
+        },
+        {
           icon: '💰',
           label: 'All Scholarships',
           href: '/dashboard/scholarships',
@@ -45,12 +51,7 @@ const Sidebar = () => {
           href: '/dashboard/blog',
           badge: '12',
         },
-        {
-          icon: '➕',
-          label: 'Add Scholarship',
-          href: '/dashboard/add-scholarships',
-          badge: null,
-        },
+
         {
           icon: '📋',
           label: 'Applications',
