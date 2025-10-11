@@ -1,54 +1,54 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios';
+import React, { useState } from "react";
+import Link from "next/link";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'student',
-    phone: '',
-    country: '',
-    educationLevel: '',
-    fieldOfStudy: '',
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "student",
+    phone: "",
+    country: "",
+    educationLevel: "",
+    fieldOfStudy: "",
     agreeToTerms: false,
   });
 
   const [loading, setLoading] = useState(false);
 
   // ✅ Fixed: No TypeScript types, works in JSX
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   // Map frontend education level values to backend values
-  const mapEducationLevel = level => {
+  const mapEducationLevel = (level) => {
     return level; // Now frontend and backend use the same values
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match!');
+      toast.error("Passwords do not match!");
       setLoading(false);
       return;
     }
 
     if (!formData.agreeToTerms) {
-      toast.warning('Please agree to the terms and conditions');
+      toast.warning("Please agree to the terms and conditions");
       setLoading(false);
       return;
     }
@@ -64,41 +64,41 @@ const RegisterPage = () => {
 
       // Send data to backend API
       const res = await axios.post(
-        'http://localhost:5000/api/users',
+        "https://global-scholarships-server-five.vercel.app/api/users",
         mappedData,
         {
-          headers: { 'Content-Type': 'application/json' },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
       // If success
       if (res.status === 201 || res.status === 200) {
         toast.success(
-          'Registration successful! Welcome to Global Scholarships 🎓'
+          "Registration successful! Welcome to Global Scholarships 🎓"
         );
-        console.log('Data sent to DB:', res.data);
+        console.log("Data sent to DB:", res.data);
       }
 
       // Reset form
       setFormData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        phone: '',
-        country: '',
-        educationLevel: '',
-        fieldOfStudy: '',
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phone: "",
+        country: "",
+        educationLevel: "",
+        fieldOfStudy: "",
         agreeToTerms: false,
       });
     } catch (error) {
       console.error(
-        'Registration error:',
+        "Registration error:",
         error.response?.data || error.message
       );
       toast.error(
         error.response?.data?.message ||
-          'Registration failed. Please try again.'
+          "Registration failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -106,32 +106,32 @@ const RegisterPage = () => {
   };
 
   const countries = [
-    'United States',
-    'Canada',
-    'United Kingdom',
-    'Australia',
-    'India',
-    'China',
-    'Malaysia',
-    'Singapore',
-    'Other',
+    "United States",
+    "Canada",
+    "United Kingdom",
+    "Australia",
+    "India",
+    "China",
+    "Malaysia",
+    "Singapore",
+    "Other",
   ];
   const educationLevels = [
-    'High School',
-    'Diploma',
-    'Bachelor',
-    'Master',
-    'PhD',
-    'Other',
+    "High School",
+    "Diploma",
+    "Bachelor",
+    "Master",
+    "PhD",
+    "Other",
   ];
   const programInterests = [
-    'Business',
-    'Engineering',
-    'Computer Science',
-    'Medicine',
-    'Arts',
-    'Sciences',
-    'Other',
+    "Business",
+    "Engineering",
+    "Computer Science",
+    "Medicine",
+    "Arts",
+    "Sciences",
+    "Other",
   ];
 
   return (
@@ -173,11 +173,11 @@ const RegisterPage = () => {
               </h3>
               <div className="space-y-3">
                 {[
-                  { icon: '🎯', text: 'Personalized program recommendations' },
-                  { icon: '💰', text: 'Exclusive scholarship opportunities' },
-                  { icon: '📊', text: 'Application progress tracking' },
-                  { icon: '👨‍🏫', text: 'Dedicated education counselor' },
-                  { icon: '⚡', text: 'Fast-track application process' },
+                  { icon: "🎯", text: "Personalized program recommendations" },
+                  { icon: "💰", text: "Exclusive scholarship opportunities" },
+                  { icon: "📊", text: "Application progress tracking" },
+                  { icon: "👨‍🏫", text: "Dedicated education counselor" },
+                  { icon: "⚡", text: "Fast-track application process" },
                 ].map((benefit, index) => (
                   <div
                     key={index}
@@ -304,7 +304,7 @@ const RegisterPage = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                 >
                   <option value="">Select your country</option>
-                  {countries.map(country => (
+                  {countries.map((country) => (
                     <option key={country} value={country}>
                       {country}
                     </option>
@@ -330,7 +330,7 @@ const RegisterPage = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                 >
                   <option value="">Select education level</option>
-                  {educationLevels.map(level => (
+                  {educationLevels.map((level) => (
                     <option key={level} value={level}>
                       {level}
                     </option>
@@ -353,7 +353,7 @@ const RegisterPage = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
                 >
                   <option value="">Select program interest</option>
-                  {programInterests.map(program => (
+                  {programInterests.map((program) => (
                     <option key={program} value={program}>
                       {program}
                     </option>
@@ -417,14 +417,14 @@ const RegisterPage = () => {
                 htmlFor="agreeToTerms"
                 className="ml-2 block text-sm text-gray-700"
               >
-                I agree to the{' '}
+                I agree to the{" "}
                 <Link
                   href="/terms"
                   className="text-green-600 hover:text-green-500"
                 >
                   Terms and Conditions
-                </Link>{' '}
-                and{' '}
+                </Link>{" "}
+                and{" "}
                 <Link
                   href="/privacy"
                   className="text-green-600 hover:text-green-500"
@@ -446,7 +446,7 @@ const RegisterPage = () => {
                   Creating Account...
                 </div>
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </button>
 
@@ -466,7 +466,7 @@ const RegisterPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
-                onClick={() => toast.info('Google registration coming soon!')}
+                onClick={() => toast.info("Google registration coming soon!")}
                 className="w-full inline-flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-200"
               >
                 <span className="mr-2">📱</span>
@@ -474,7 +474,7 @@ const RegisterPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => toast.info('Facebook registration coming soon!')}
+                onClick={() => toast.info("Facebook registration coming soon!")}
                 className="w-full inline-flex justify-center items-center px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-200"
               >
                 <span className="mr-2">📘</span>
@@ -485,7 +485,7 @@ const RegisterPage = () => {
             {/* Login Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <Link
                   href="/login"
                   className="font-medium text-green-600 hover:text-green-500"
