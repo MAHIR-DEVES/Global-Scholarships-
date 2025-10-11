@@ -1,5 +1,6 @@
 'use client';
 import userService from '@/utils/userService';
+import { useAuth } from '@/contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
 
 const Navbar = ({ onMenuToggle }) => {
@@ -8,26 +9,10 @@ const Navbar = ({ onMenuToggle }) => {
   const [currentTime, setCurrentTime] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // user info
-  const [userProfile, setUserProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  console.log(userProfile?.user);
+  const { user, loading, error } = useAuth();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const userData = await userService.getCurrentUser();
-        setUserProfile(userData);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, []);
+  // If user is not available, we'll show login/signup buttons
+  const isAuthenticated = !!user;
 
   useEffect(() => {
     const updateTime = () => {
@@ -76,12 +61,15 @@ const Navbar = ({ onMenuToggle }) => {
     },
   ];
 
-  const user = {
-    name: 'Sarah Johnson',
-    email: 'sarah@globalscholarships.com',
-    role: 'Administrator',
-    initials: 'SJ',
-  };
+  // Create initials from user name
+  const userInitials = user?.name
+    ? user.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2)
+    : 'U';
 
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
@@ -134,7 +122,29 @@ const Navbar = ({ onMenuToggle }) => {
                 Dashboard Overview
               </h2>
               <p className="text-sm text-gray-500 flex items-center space-x-2 mt-1">
-                <span>Welcome back, {userProfile?.user?.name}</span>
+                {isAuthenticated ? (
+                  <span>
+                    {loading ? (
+                      'Loading...'
+                    ) : error ? (
+                      'Error loading user'
+                    ) : (
+                      <>
+                        Welcome back, {user.name}
+                        {user.role && (
+                          <>
+                            {' '}
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full ml-2">
+                              {user.role}
+                            </span>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </span>
+                ) : (
+                  <span>Welcome to Global Scholars</span>
+                )}
                 <span>•</span>
                 <span className="flex items-center space-x-1">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -308,111 +318,149 @@ const Navbar = ({ onMenuToggle }) => {
             {/* Divider - Hidden on mobile */}
             <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
 
-            {/* Profile */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setIsProfileOpen(!isProfileOpen);
-                  setIsNotificationsOpen(false);
-                }}
-                className="flex items-center space-x-2 sm:space-x-3 p-1 rounded-xl hover:bg-gray-100 transition-all duration-200 group"
-              >
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow transition-shadow">
-                  <span className="text-white text-sm font-semibold">
-                    {user.initials}
-                  </span>
-                </div>
-                <div className="hidden lg:block text-left">
-                  <p className="text-sm font-semibold text-gray-900">
-                    {userProfile?.user?.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {userProfile?.user?.role}
-                  </p>
-                </div>
-                <svg
-                  className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors hidden lg:block"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            {/* Conditional rendering based on authentication status */}
+            {isAuthenticated ? (
+              /* Profile */
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setIsProfileOpen(!isProfileOpen);
+                    setIsNotificationsOpen(false);
+                  }}
+                  className="flex items-center space-x-2 sm:space-x-3 p-1 rounded-xl hover:bg-gray-100 transition-all duration-200 group"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow transition-shadow">
+                    <span className="text-white text-sm font-semibold">
+                      {userInitials}
+                    </span>
+                  </div>
+                  <div className="hidden lg:block text-left">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {loading ? 'Loading...' : user.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {loading ? 'User' : user.role}
+                    </p>
+                  </div>
+                  <svg
+                    className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors hidden lg:block"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
 
-              {/* Profile Dropdown */}
-              {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden animate-in fade-in-0 zoom-in-95">
-                  {/* User Info */}
-                  <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-100">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <span className="text-white text-sm font-semibold">
-                          {user.initials}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                          {userProfile?.user?.name}
-                        </p>
-                        <p className="text-xs text-gray-600 truncate">
-                          {userProfile?.user?.email}
-                        </p>
-                        <p className="text-xs text-blue-600 font-medium mt-1">
-                          {userProfile?.user?.role}
-                        </p>
+                {/* Profile Dropdown */}
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden animate-in fade-in-0 zoom-in-95">
+                    {/* User Info */}
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                          <span className="text-white text-sm font-semibold">
+                            {userInitials}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {loading ? (
+                            <>
+                              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2 animate-pulse"></div>
+                              <div className="h-3 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+                            </>
+                          ) : error ? (
+                            <p className="text-sm text-red-600">
+                              Error loading profile
+                            </p>
+                          ) : (
+                            <>
+                              <p className="text-sm font-semibold text-gray-900 truncate">
+                                {user.name}
+                              </p>
+                              <p className="text-xs text-gray-600 truncate">
+                                {user.email}
+                              </p>
+                              <p className="text-xs text-blue-600 font-medium mt-1">
+                                {user.role}
+                              </p>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Menu Items */}
-                  <div className="p-2">
-                    <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                      <div className="w-5 h-5 text-gray-400">👤</div>
-                      <span>My Profile</span>
-                    </button>
-                    <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                      <div className="w-5 h-5 text-gray-400">⚙️</div>
-                      <span>Account Settings</span>
-                    </button>
-                    <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                      <div className="w-5 h-5 text-gray-400">🛡️</div>
-                      <span>Privacy & Security</span>
-                    </button>
-                    <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                      <div className="w-5 h-5 text-gray-400">💬</div>
-                      <span>Support Center</span>
-                    </button>
-                  </div>
+                    {/* Menu Items */}
+                    <div className="p-2">
+                      <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
+                        <div className="w-5 h-5 text-gray-400">👤</div>
+                        <span>My Profile</span>
+                      </button>
+                      <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
+                        <div className="w-5 h-5 text-gray-400">⚙️</div>
+                        <span>Account Settings</span>
+                      </button>
+                      <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
+                        <div className="w-5 h-5 text-gray-400">🛡️</div>
+                        <span>Privacy & Security</span>
+                      </button>
+                      <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
+                        <div className="w-5 h-5 text-gray-400">💬</div>
+                        <span>Support Center</span>
+                      </button>
+                    </div>
 
-                  {/* Footer */}
-                  <div className="p-2 border-t border-gray-100">
-                    <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150">
-                      <div className="w-5 h-5">
-                        <svg
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
-                      </div>
-                      <span>Sign Out</span>
-                    </button>
+                    {/* Footer */}
+                    <div className="p-2 border-t border-gray-100">
+                      <button
+                        onClick={() => {
+                          userService.logout();
+                          window.location.href = '/login';
+                        }}
+                        className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                      >
+                        <div className="w-5 h-5">
+                          <svg
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                            />
+                          </svg>
+                        </div>
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              /* Login and Signup Buttons */
+              <div className="flex items-center space-x-2">
+                <a
+                  href="/login"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  Login
+                </a>
+                <a
+                  href="/register"
+                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Sign Up
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
