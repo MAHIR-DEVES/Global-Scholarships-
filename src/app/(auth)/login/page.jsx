@@ -1,64 +1,65 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios';
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
+import useLogin from "@/hooks/useLogin";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const router = useRouter();
   const { loginUser, loading, error } = useLogin();
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const response = await axios.post(
-        'https://global-scholarships-server-five.vercel.app/api/users/login',
+        "https://global-scholarships-server-five.vercel.app/api/users/login",
         formData,
         {
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
 
       if (response.data.success) {
         // Store token in localStorage
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
 
-        toast.success('Login successful! Welcome back!');
+        toast.success("Login successful! Welcome back!");
 
         // Redirect based on user role
-        if (response.data.user.role === 'admin') {
-          router.push('/admin/dashboard');
+        if (response.data.user.role === "admin") {
+          router.push("/admin/dashboard");
         } else {
-          router.push('/');
+          router.push("/");
         }
       }
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
-        'Login failed. Please check your credentials.';
+        "Login failed. Please check your credentials.";
       toast.error(errorMessage);
-      console.error('Login error:', error);
+      console.error("Login error:", error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -98,11 +99,11 @@ const LoginPage = () => {
               <h3 className="text-2xl font-bold text-gray-900">Why Sign In?</h3>
               <div className="space-y-3">
                 {[
-                  { icon: '📋', text: 'Track your applications' },
-                  { icon: '💼', text: 'Access personalized recommendations' },
-                  { icon: '💰', text: 'View scholarship opportunities' },
-                  { icon: '📚', text: 'Save favorite programs' },
-                  { icon: '🎯', text: 'Get expert guidance' },
+                  { icon: "📋", text: "Track your applications" },
+                  { icon: "💼", text: "Access personalized recommendations" },
+                  { icon: "💰", text: "View scholarship opportunities" },
+                  { icon: "📚", text: "Save favorite programs" },
+                  { icon: "🎯", text: "Get expert guidance" },
                 ].map((feature, index) => (
                   <div
                     key={index}
@@ -241,7 +242,7 @@ const LoginPage = () => {
                   Signing In...
                 </div>
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </button>
 
@@ -278,7 +279,7 @@ const LoginPage = () => {
             {/* Sign Up Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
+                Don't have an account?{" "}
                 <Link
                   href="/register"
                   className="font-medium text-blue-600 hover:text-blue-500"
