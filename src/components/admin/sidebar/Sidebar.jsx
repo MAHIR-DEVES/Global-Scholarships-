@@ -46,6 +46,13 @@ const Sidebar = () => {
           badge: '200+',
         },
         {
+          icon: '➕',
+          label: ' Tutorial',
+          href: '/dashboard/all-tutorial',
+          badge: null,
+        },
+
+        {
           icon: '📝',
           label: 'Blog Posts',
           href: '/dashboard/blog',

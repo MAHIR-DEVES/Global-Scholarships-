@@ -1,10 +1,10 @@
-"use client";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import clsx from "clsx";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import userService from "@/utils/userService";
+'use client';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import clsx from 'clsx';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import userService from '@/utils/userService';
 
 const Navbar = ({ className }) => {
   const pathname = usePathname();
@@ -16,7 +16,7 @@ const Navbar = ({ className }) => {
   // user info
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   console.log(userProfile?.user);
 
   // useEffect(() => {
@@ -44,7 +44,7 @@ const Navbar = ({ className }) => {
           setUserProfile(null);
         } else {
           // unexpected error
-          setError(err.message || "An error occurred");
+          setError(err.message || 'An error occurred');
         }
       } finally {
         setLoading(false);
@@ -56,46 +56,46 @@ const Navbar = ({ className }) => {
 
   const navLinks = [
     {
-      name: "Scholarships",
-      href: "/#",
-      icon: "🎓",
+      name: 'Scholarships',
+      href: '/#',
+      icon: '🎓',
       submenu: [
-        { name: "Gov. Scholarships", href: "/scholarships/gov-scholarship" },
-        { name: "Bachelor", href: "/scholarships/bachelor" },
-        { name: "Masters", href: "/scholarships/masters" },
-        { name: "Diploma", href: "/scholarships/diploma" },
-        { name: "Language", href: "/scholarships/language" },
+        { name: 'Gov. Scholarships', href: '/scholarships/gov-scholarship' },
+        { name: 'Bachelor', href: '/scholarships/bachelor' },
+        { name: 'Masters', href: '/scholarships/masters' },
+        { name: 'Diploma', href: '/scholarships/diploma' },
+        { name: 'Language', href: '/scholarships/language' },
       ],
     },
 
-    { name: "Upcoming", href: "/upcoming", icon: "📅" },
-    { name: "SOP ", href: "/sop", icon: "🏛️" },
-    { name: "IELTS", href: "/ielts", icon: "📝" },
-    { name: "Blog", href: "/blog", icon: "📰" },
+    { name: 'Upcoming', href: '/upcoming', icon: '📅' },
+    { name: 'SOP ', href: '/sop', icon: '🏛️' },
+    { name: 'IELTS', href: '/ielts', icon: '📝' },
+    { name: 'Blog', href: '/blog', icon: '📰' },
     {
-      name: "service",
-      href: "/#",
-      icon: "🛡️",
+      name: 'service',
+      href: '/#',
+      icon: '🛡️',
       submenu: [
         {
-          name: "University Application",
-          href: "/service/university-application",
+          name: 'University Application',
+          href: '/service/university-application',
         },
         {
-          name: " SOP Writing",
-          href: "/service/sop-writing",
+          name: ' SOP Writing',
+          href: '/service/sop-writing',
         },
       ],
     },
   ];
 
   const handleLoginClick = () => {
-    router.push("/login");
+    router.push('/login');
     setIsMobileMenuOpen(false);
   };
 
   const handleRegisterClick = () => {
-    router.push("/register");
+    router.push('/register');
     setIsMobileMenuOpen(false);
   };
 
@@ -105,9 +105,9 @@ const Navbar = ({ className }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem('token');
     setDropdownOpen(false);
-    router.push("/login");
+    router.push('/login');
   };
 
   return (
@@ -116,7 +116,7 @@ const Navbar = ({ className }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
       className={clsx(
-        "fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-100",
+        'fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-100',
         className
       )}
     >
@@ -162,10 +162,10 @@ const Navbar = ({ className }) => {
                 <Link
                   href={link.href}
                   className={clsx(
-                    "relative flex items-center space-x-2 px-2.5 py-2 rounded-xl font-medium transition-all duration-300 group",
+                    'relative flex items-center space-x-2 px-2.5 py-2 rounded-xl font-medium transition-all duration-300 group',
                     pathname === link.href
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-700 hover:text-blue-600"
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:text-blue-600'
                   )}
                 >
                   <span className="text-lg">{link.icon}</span>
@@ -182,7 +182,7 @@ const Navbar = ({ className }) => {
                     transition={{ duration: 0.2 }}
                     className="absolute top-full left-0  w-56 bg-white shadow-lg rounded-xl border border-gray-100 z-50"
                   >
-                    {link.submenu.map((sub) => (
+                    {link.submenu.map(sub => (
                       <Link
                         key={sub.name}
                         href={sub.href}
@@ -210,7 +210,7 @@ const Navbar = ({ className }) => {
                     <img
                       src={
                         userProfile?.user?.photoURL ||
-                        "https://i.ibb.co/4pDNDk1/avatar.png"
+                        'https://i.ibb.co/4pDNDk1/avatar.png'
                       }
                       alt="Profile"
                       className="w-full h-full object-cover"
@@ -241,18 +241,6 @@ const Navbar = ({ className }) => {
                           <div className="w-5 h-5 text-gray-400">👤</div>
                           <span>My Profile</span>
                         </Link>
-                        <Link
-                          href="/dashboard/settings"
-                          className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150"
-                        >
-                          <div className="w-5 h-5 text-gray-400">⚙️</div>
-                          <span>Account Settings</span>
-                        </Link>
-
-                        <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-150">
-                          <div className="w-5 h-5 text-gray-400">💬</div>
-                          <span>Support Center</span>
-                        </button>
                       </div>
 
                       {/* Footer */}
@@ -318,27 +306,27 @@ const Navbar = ({ className }) => {
             <div className="w-6 h-6 flex flex-col justify-center items-center relative">
               <span
                 className={clsx(
-                  "w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300 absolute",
+                  'w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300 absolute',
                   {
-                    "rotate-45": isMobileMenuOpen,
-                    "-translate-y-1.5": !isMobileMenuOpen,
+                    'rotate-45': isMobileMenuOpen,
+                    '-translate-y-1.5': !isMobileMenuOpen,
                   }
                 )}
               ></span>
               <span
                 className={clsx(
-                  "w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300",
+                  'w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
                   {
-                    "opacity-0": isMobileMenuOpen,
+                    'opacity-0': isMobileMenuOpen,
                   }
                 )}
               ></span>
               <span
                 className={clsx(
-                  "w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300 absolute",
+                  'w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300 absolute',
                   {
-                    "-rotate-45": isMobileMenuOpen,
-                    "translate-y-1.5": !isMobileMenuOpen,
+                    '-rotate-45': isMobileMenuOpen,
+                    'translate-y-1.5': !isMobileMenuOpen,
                   }
                 )}
               ></span>
@@ -353,7 +341,7 @@ const Navbar = ({ className }) => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
               className="lg:hidden absolute top-full left-4 right-4 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden"
             >
               <div className="p-4 space-y-1">
@@ -372,13 +360,13 @@ const Navbar = ({ className }) => {
                         <span>{link.name}</span>
                       </div>
                       {link.submenu && (
-                        <span>{activeDropdown === link.name ? "▲" : "▼"}</span>
+                        <span>{activeDropdown === link.name ? '▲' : '▼'}</span>
                       )}
                     </button>
 
                     {link.submenu && activeDropdown === link.name && (
                       <div className="ml-6 mt-1 space-y-1">
-                        {link.submenu.map((sub) => (
+                        {link.submenu.map(sub => (
                           <Link
                             key={sub.name}
                             href={sub.href}
