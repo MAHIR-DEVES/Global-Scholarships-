@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 
 const PREDEFINED_CATEGORIES = [
@@ -45,6 +47,13 @@ export default function CategorySelector({
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addCustomCategory();
+    }
+  };
+
   const removeCategory = (categoryName) => {
     onCategoriesChange(
       selectedCategories.filter((cat) => cat.name !== categoryName)
@@ -52,8 +61,8 @@ export default function CategorySelector({
   };
 
   return (
-    <div className="form-group">
-      <label className="form-label">
+    <div className="mb-6">
+      <label className="block text-sm font-semibold text-gray-700 mb-2">
         Categories
         <span className="text-red-500 ml-1">*</span>
       </label>
@@ -69,7 +78,11 @@ export default function CategorySelector({
               key={category}
               type="button"
               onClick={() => toggleCategory(category)}
-              className={`category-chip ${isSelected ? "selected" : ""}`}
+              className={`px-4 py-2 rounded-full border-2 text-sm font-medium transition-all ${
+                isSelected
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "border-gray-300 hover:border-blue-500"
+              }`}
             >
               {category}
             </button>
@@ -83,16 +96,14 @@ export default function CategorySelector({
           type="text"
           value={customCategory}
           onChange={(e) => setCustomCategory(e.target.value)}
-          onKeyPress={(e) =>
-            e.key === "Enter" && (e.preventDefault(), addCustomCategory())
-          }
+          onKeyPress={handleKeyPress}
           placeholder="Add custom category"
-          className="form-input flex-1"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
         />
         <button
           type="button"
           onClick={addCustomCategory}
-          className="btn-secondary"
+          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium"
         >
           Add
         </button>
@@ -100,18 +111,21 @@ export default function CategorySelector({
 
       {/* Selected Categories */}
       {selectedCategories.length > 0 && (
-        <div className="selected-categories">
+        <div className="bg-gray-50 p-4 rounded-lg">
           <p className="text-sm font-medium text-gray-700 mb-2">
             Selected ({selectedCategories.length}):
           </p>
           <div className="flex flex-wrap gap-2">
             {selectedCategories.map((category) => (
-              <span key={category.name} className="category-badge">
+              <span
+                key={category.name}
+                className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+              >
                 {category.name}
                 <button
                   type="button"
                   onClick={() => removeCategory(category.name)}
-                  className="ml-2 hover:text-red-600"
+                  className="ml-2 hover:text-red-600 font-bold"
                 >
                   ×
                 </button>
@@ -121,7 +135,7 @@ export default function CategorySelector({
         </div>
       )}
 
-      {error && <p className="form-error">{error}</p>}
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   );
 }
