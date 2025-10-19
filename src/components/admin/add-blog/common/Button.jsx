@@ -1,26 +1,32 @@
+"use client";
+
 export default function Button({
   children,
   variant = "primary",
   loading = false,
   disabled = false,
+  className = "",
   ...props
 }) {
   const variants = {
-    primary: "btn-primary",
-    secondary: "btn-secondary",
-    danger: "btn-danger",
+    primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+    secondary:
+      "bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500",
+    danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
   };
 
   return (
     <button
-      className={`btn ${variants[variant]} ${
+      className={`px-6 py-2.5 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+        variants[variant]
+      } ${
         loading || disabled ? "opacity-50 cursor-not-allowed" : ""
-      }`}
+      } ${className}`}
       disabled={loading || disabled}
       {...props}
     >
       {loading ? (
-        <span className="flex items-center gap-2">
+        <span className="flex items-center justify-center gap-2">
           <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
             <circle
               className="opacity-25"
