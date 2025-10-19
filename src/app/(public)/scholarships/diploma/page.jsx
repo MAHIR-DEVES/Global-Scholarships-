@@ -1,11 +1,35 @@
-import React from 'react';
+'use client';
+import { getAllScholarships } from '@/lib/scholarshipApi';
+import React, { useState, useEffect } from 'react';
 
-const page = () => {
+const ScholarshipsPage = () => {
+  const [scholarships, setScholarships] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAllScholarships({ level: 'diploma' });
+        setScholarships(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
-    <div>
-      <p>diploma</p>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Scholarships</h1>
+      <ul>
+        {scholarships.map(sch => (
+          <li key={sch._id}>
+            {sch.universityName} - {sch.level} - {sch.applicationDeadline}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-export default page;
+export default ScholarshipsPage;
