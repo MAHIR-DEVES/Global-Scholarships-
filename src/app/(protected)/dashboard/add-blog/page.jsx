@@ -17,10 +17,12 @@ import CategorySelector from "@/components/admin/add-blog/CategorySelector";
 import api from "@/utils/api";
 import { toast } from "react-toastify";
 
+// Add Blog Page
 export default function AddBlog() {
   const [session, setUserProfile] = useState(null);
   const router = useRouter();
 
+  // Fetch user profile on mount
   useEffect(() => {
     const fetchProfile = async () => {
       try {
