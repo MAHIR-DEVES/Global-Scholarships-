@@ -1,48 +1,40 @@
-import { NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
+import { NextResponse } from 'next/server';
+import { v2 as cloudinary } from 'cloudinary';
 
-// Configure Cloudinary with your credentials from .env
-cloudinary.config();
+// 🔹 Configure Cloudinary with environment variables
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
+// 🔹 Handle POST request
 export async function POST(request) {
-  const formData = await request.formData();
-  const file = formData.get("file");
-
-  if (!file) {
-    return NextResponse.json({ error: "No file provided." }, { status: 400 });
-  }
-
   try {
-    // Convert the file to a buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const data = await request.formData();
+    const file = data.get('file'); // key must match from frontend
 
-    // Use a Promise to handle the upload stream
-    const response = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: "scholarship_images", // Optional: specify a folder in Cloudinary
-        },
-        (err, result) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(result);
-        }
-      );
-      uploadStream.end(buffer);
+    if (!file) {
+      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+    }
+
+    // Convert the file to a base64-encoded string
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // 🔹 Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream({ folder: 'uploads' }, (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        })
+        .end(buffer);
     });
 
-    // Return the secure URL and public ID from Cloudinary
-    return NextResponse.json({
-      url: response.secure_url,
-      public_id: response.public_id,
-    });
+    return NextResponse.json({ url: result.secure_url });
   } catch (error) {
-    console.error("Error uploading to Cloudinary:", error);
-    return NextResponse.json(
-      { error: "Failed to upload file." },
-      { status: 500 }
-    );
+    console.error('Upload error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
