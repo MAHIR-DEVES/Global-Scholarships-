@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 
-// 🔹 Configure Cloudinary with environment variables
+//  Configure Cloudinary with environment variables
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// 🔹 Handle POST request
+//  Handle POST
 export async function POST(request) {
   try {
     const data = await request.formData();
