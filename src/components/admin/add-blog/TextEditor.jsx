@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
-import TextStyle from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 
 const MenuBar = ({ editor }) => {
@@ -32,7 +31,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        className={`px-3 py-1 rounded ${
+        className={`px-3 py-1 rounded text-sm ${
           editor.isActive("heading", { level: 1 })
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -43,7 +42,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={`px-3 py-1 rounded ${
+        className={`px-3 py-1 rounded text-sm ${
           editor.isActive("heading", { level: 2 })
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -54,7 +53,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={`px-3 py-1 rounded ${
+        className={`px-3 py-1 rounded text-sm ${
           editor.isActive("heading", { level: 3 })
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -69,7 +68,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={`px-3 py-1 rounded font-bold ${
+        className={`px-3 py-1 rounded text-sm font-bold ${
           editor.isActive("bold")
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -80,7 +79,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={`px-3 py-1 rounded italic ${
+        className={`px-3 py-1 rounded text-sm italic ${
           editor.isActive("italic")
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -91,7 +90,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleUnderline().run()}
-        className={`px-3 py-1 rounded underline ${
+        className={`px-3 py-1 rounded text-sm underline ${
           editor.isActive("underline")
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -102,7 +101,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={`px-3 py-1 rounded line-through ${
+        className={`px-3 py-1 rounded text-sm line-through ${
           editor.isActive("strike")
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -117,7 +116,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={`px-3 py-1 rounded ${
+        className={`px-3 py-1 rounded text-sm ${
           editor.isActive("bulletList")
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -128,7 +127,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={`px-3 py-1 rounded ${
+        className={`px-3 py-1 rounded text-sm ${
           editor.isActive("orderedList")
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -143,7 +142,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        className={`px-3 py-1 rounded ${
+        className={`px-3 py-1 rounded text-sm ${
           editor.isActive("codeBlock")
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -156,7 +155,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={setLink}
-        className={`px-3 py-1 rounded ${
+        className={`px-3 py-1 rounded text-sm ${
           editor.isActive("link")
             ? "bg-blue-500 text-white"
             : "bg-white hover:bg-gray-200"
@@ -169,7 +168,7 @@ const MenuBar = ({ editor }) => {
       <button
         type="button"
         onClick={addImage}
-        className="px-3 py-1 rounded bg-white hover:bg-gray-200"
+        className="px-3 py-1 rounded text-sm bg-white hover:bg-gray-200"
       >
         Image
       </button>
@@ -182,7 +181,7 @@ const MenuBar = ({ editor }) => {
         onClick={() =>
           editor.chain().focus().clearNodes().unsetAllMarks().run()
         }
-        className="px-3 py-1 rounded bg-white hover:bg-gray-200"
+        className="px-3 py-1 rounded text-sm bg-white hover:bg-gray-200"
       >
         Clear
       </button>
@@ -192,7 +191,7 @@ const MenuBar = ({ editor }) => {
 
 export default function TextEditor({
   label,
-  value,
+  value = "",
   onChange,
   error,
   placeholder = "Write your content here...",
@@ -209,17 +208,18 @@ export default function TextEditor({
       Image,
     ],
     content: value || "<p></p>",
+    immediatelyRender: false, // ✅ THIS IS THE FIX
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      const html = editor.getHTML();
+      onChange(html);
+    },
+    editorProps: {
+      attributes: {
+        class:
+          "prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none min-h-[300px] p-4",
+      },
     },
   });
-
-  // Update editor content when value changes externally
-  useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value || "<p></p>");
-    }
-  }, [value, editor]);
 
   return (
     <div className="mb-6">
@@ -230,15 +230,12 @@ export default function TextEditor({
         </label>
       )}
       <div
-        className={`border rounded-lg overflow-hidden ${
+        className={`border rounded-lg overflow-hidden bg-white ${
           error ? "border-red-500" : "border-gray-300"
         }`}
       >
         <MenuBar editor={editor} />
-        <EditorContent
-          editor={editor}
-          className="prose max-w-none p-4 min-h-[300px] focus:outline-none"
-        />
+        <EditorContent editor={editor} />
       </div>
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
