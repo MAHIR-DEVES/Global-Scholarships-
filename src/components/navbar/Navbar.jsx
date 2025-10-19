@@ -61,10 +61,7 @@ const Navbar = ({ className }) => {
       icon: '🎓',
       submenu: [
         { name: 'Gov. Scholarships', href: '/scholarships/gov-scholarship' },
-        { name: 'Bachelor', href: '/scholarships/bachelor' },
-        { name: 'Masters', href: '/scholarships/masters' },
-        { name: 'Diploma', href: '/scholarships/diploma' },
-        { name: 'Language', href: '/scholarships/language' },
+        { name: 'All Scholarships', href: '/scholarships/all-scholarships' },
       ],
     },
 

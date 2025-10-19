@@ -53,15 +53,37 @@ const AddTutorialPage = () => {
     setLoading(true);
 
     try {
-      const submitData = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (formData[key]) submitData.append(key, formData[key]);
-      });
-      if (thumbnail) submitData.append('thumbnail', thumbnail);
+      let imageUrl = '';
 
-      const response = await api.post('/api/tutorials', submitData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Step 1: Upload to Cloudinary if thumbnail exists
+      if (thumbnail) {
+        const imageData = new FormData();
+        imageData.append('file', thumbnail);
+
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: imageData,
+        });
+
+        const uploadResult = await uploadRes.json();
+        if (uploadResult.success) {
+          imageUrl = uploadResult.url;
+        } else {
+          toast.error('Image upload failed');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Step 2: Submit tutorial data (with imageUrl)
+      const tutorialData = {
+        ...formData,
+        thumbnailUrl: imageUrl,
+      };
+
+      console.log(tutorialData);
+
+      // const response = await api.post('/api/tutorials', tutorialData);
 
       if (response?.data?.status) {
         toast.success(`${response?.data?.message}`);
