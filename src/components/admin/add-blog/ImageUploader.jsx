@@ -1,4 +1,7 @@
+"use client";
+
 import { useState } from "react";
+import Image from "next/image";
 
 export default function ImageUploader({
   label,
@@ -59,10 +62,10 @@ export default function ImageUploader({
   };
 
   return (
-    <div className="form-group">
-      <label className="form-label">
+    <div className="mb-6">
+      <label className="block text-sm font-semibold text-gray-700 mb-2">
         {label}
-        <span className="text-sm text-gray-500 ml-2">
+        <span className="text-sm text-gray-500 font-normal ml-2">
           (Max {maxImages} images)
         </span>
       </label>
@@ -71,7 +74,7 @@ export default function ImageUploader({
         {/* Upload Button */}
         {images.length < maxImages && (
           <div>
-            <label className="upload-btn">
+            <label className="inline-flex items-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-200">
               <input
                 type="file"
                 accept="image/*"
@@ -93,13 +96,18 @@ export default function ImageUploader({
                         strokeWidth="4"
                         fill="none"
                       />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
                     </svg>
-                    Uploading...
+                    <span className="text-gray-700">Uploading...</span>
                   </>
                 ) : (
                   <>
                     <svg
-                      className="w-5 h-5"
+                      className="w-5 h-5 text-gray-700"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -111,7 +119,7 @@ export default function ImageUploader({
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                    Choose Images
+                    <span className="text-gray-700">Choose Images</span>
                   </>
                 )}
               </span>
@@ -124,15 +132,17 @@ export default function ImageUploader({
           <div className="grid grid-cols-2 gap-4">
             {images.map((url, index) => (
               <div key={index} className="relative group">
-                <img
+                <Image
                   src={url}
                   alt={`Upload ${index + 1}`}
+                  width={400}
+                  height={300}
                   className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
                 />
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                 >
                   <svg
                     className="w-4 h-4"
@@ -155,7 +165,7 @@ export default function ImageUploader({
 
         {/* Errors */}
         {(uploadError || error) && (
-          <p className="form-error">{uploadError || error}</p>
+          <p className="text-red-500 text-sm">{uploadError || error}</p>
         )}
       </div>
     </div>
