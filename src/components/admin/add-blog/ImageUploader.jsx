@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export default function ImageUploader({
   label,
-  maxImages = 2,
+  maxImages = 5,
   onImagesChange,
   error,
 }) {

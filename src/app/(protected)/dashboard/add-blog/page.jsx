@@ -165,8 +165,8 @@ export default function AddBlog() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen  py-8">
+      <div className=" mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -245,7 +245,7 @@ export default function AddBlog() {
           {/* Cover Images */}
           <ImageUploader
             label="Cover Images"
-            maxImages={2}
+            maxImages={5}
             onImagesChange={(images) => handleChange("coverImageUrl", images)}
             error={errors.coverImageUrl}
           />
