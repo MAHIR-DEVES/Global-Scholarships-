@@ -7,13 +7,18 @@ const UpcomingScholarships = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLevel, setSelectedLevel] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(6); // items per page
 
+  // Fetch scholarships from backend
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await getAllScholarships();
-        setScholarships(data);
+        const data = await getAllScholarships({ page: currentPage, limit });
+        setScholarships(data.data);
+        setTotalPages(data.totalPages);
       } catch (error) {
         console.error('Error fetching scholarships:', error);
       } finally {
@@ -21,9 +26,9 @@ const UpcomingScholarships = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [currentPage, limit]);
 
-  // Filter scholarships based on level and search term
+  // Filter scholarships locally
   const filteredScholarships = scholarships.filter(scholarship => {
     const matchesLevel =
       selectedLevel === 'all' || scholarship.level === selectedLevel;
@@ -38,22 +43,18 @@ const UpcomingScholarships = () => {
     return matchesLevel && matchesSearch;
   });
 
-  // Get unique levels for filter
   const levels = [
     'all',
     ...new Set(scholarships.map(s => s.level).filter(Boolean)),
   ];
 
-  // Calculate days until deadline
   const getDaysUntilDeadline = deadline => {
     const deadlineDate = new Date(deadline);
     const today = new Date();
     const diffTime = deadlineDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  // Format currency
   const formatCurrency = amount => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -92,10 +93,9 @@ const UpcomingScholarships = () => {
           </p>
         </div>
 
-        {/* Search and Filter Section */}
+        {/* Search & Filter */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Search Input */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
                 🔍 Search Scholarships
@@ -108,8 +108,6 @@ const UpcomingScholarships = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
               />
             </div>
-
-            {/* Level Filter */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
                 🎯 Study Level
@@ -129,7 +127,7 @@ const UpcomingScholarships = () => {
           </div>
         </div>
 
-        {/* Scholarships List - Horizontal Cards */}
+        {/* Scholarship Cards */}
         {filteredScholarships.length === 0 ? (
           <div className="text-center py-16 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl">
             <div className="text-8xl mb-6">🔍</div>
@@ -147,7 +145,7 @@ const UpcomingScholarships = () => {
               const daysUntilDeadline = getDaysUntilDeadline(
                 scholarship.applicationDeadline
               );
-              const isUrgent = daysUntilDeadline <= 7;
+              const isUrgent = daysUntilDeadline <= 7 && daysUntilDeadline > 3;
               const isVeryUrgent = daysUntilDeadline <= 3;
 
               return (
@@ -156,7 +154,7 @@ const UpcomingScholarships = () => {
                   className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 overflow-hidden border border-gray-100"
                 >
                   <div className="flex flex-col md:flex-row">
-                    {/* Left Side - Logo Section */}
+                    {/* Left Side - Logo */}
                     <div className="md:w-1/4 p-6 bg-gradient-to-br from-blue-50 to-purple-50 flex flex-col items-center justify-center border-r border-gray-200">
                       <div className="w-32 h-32 bg-white rounded-2xl shadow-md p-4 flex items-center justify-center mb-4">
                         <img
@@ -175,37 +173,30 @@ const UpcomingScholarships = () => {
                           </span>
                         </div>
                       </div>
-
-                      {/* University Name */}
                       <h3 className="text-lg font-bold text-gray-900 text-center line-clamp-2 mb-2">
                         {scholarship.universityName}
                       </h3>
-
-                      {/* Country */}
                       <div className="flex items-center gap-1 text-gray-600 mb-3">
                         <span>📍</span>
                         <span className="text-sm">{scholarship.country}</span>
                       </div>
-
-                      {/* Level Badge */}
                       <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
                         {scholarship.level}
                       </div>
                     </div>
 
-                    {/* Right Side - Information Section */}
+                    {/* Right Side - Info */}
                     <div className="md:w-3/4 p-6">
                       <div className="flex flex-col h-full">
-                        {/* Header with Deadline */}
                         <div className="flex justify-between items-start mb-4">
                           <div>
                             <h4 className="text-xl font-bold text-gray-900 mb-2">
                               Scholarship Program
                             </h4>
                             <div className="flex flex-wrap gap-2 mb-3">
-                              {scholarship.majors?.map((major, index) => (
+                              {scholarship.majors?.map((major, idx) => (
                                 <span
-                                  key={index}
+                                  key={idx}
                                   className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
                                 >
                                   {major}
@@ -213,8 +204,6 @@ const UpcomingScholarships = () => {
                               ))}
                             </div>
                           </div>
-
-                          {/* Deadline Badge */}
                           <div
                             className={`px-4 py-2 rounded-full text-white font-bold text-sm ${
                               isVeryUrgent
@@ -230,7 +219,6 @@ const UpcomingScholarships = () => {
                           </div>
                         </div>
 
-                        {/* Key Information Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                           <div className="text-center p-4 bg-blue-50 rounded-xl">
                             <div className="text-2xl mb-2">💰</div>
@@ -243,7 +231,6 @@ const UpcomingScholarships = () => {
                                 : 'Full Scholarship'}
                             </div>
                           </div>
-
                           <div className="text-center p-4 bg-green-50 rounded-xl">
                             <div className="text-2xl mb-2">⏱️</div>
                             <div className="text-sm text-gray-600 font-semibold">
@@ -254,7 +241,6 @@ const UpcomingScholarships = () => {
                               {scholarship.duration === '1' ? 'year' : 'years'}
                             </div>
                           </div>
-
                           <div className="text-center p-4 bg-purple-50 rounded-xl">
                             <div className="text-2xl mb-2">📚</div>
                             <div className="text-sm text-gray-600 font-semibold">
@@ -268,7 +254,6 @@ const UpcomingScholarships = () => {
                           </div>
                         </div>
 
-                        {/* Additional Details */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                           <div>
                             <span className="text-sm font-semibold text-gray-700 block mb-1">
@@ -276,10 +261,9 @@ const UpcomingScholarships = () => {
                             </span>
                             <p className="text-sm text-gray-600">
                               {scholarship.description ||
-                                'Check official website for detailed requirements'}
+                                'Check official website for details'}
                             </p>
                           </div>
-
                           <div>
                             <span className="text-sm font-semibold text-gray-700 block mb-1">
                               📅 Application Deadline:
@@ -295,7 +279,6 @@ const UpcomingScholarships = () => {
                           </div>
                         </div>
 
-                        {/* Contact and Action Buttons */}
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-auto pt-4 border-t border-gray-200">
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <span>📧</span>
@@ -304,7 +287,6 @@ const UpcomingScholarships = () => {
                                 'Contact via website'}
                             </span>
                           </div>
-
                           <div className="flex gap-3">
                             <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 font-semibold">
                               Apply Now
@@ -326,32 +308,131 @@ const UpcomingScholarships = () => {
           </div>
         )}
 
-        {/* Stats Section */}
-        <div className="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl p-8 text-white">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold mb-2">
-                {scholarships.length}+
-              </div>
-              <div className="text-blue-100">Available Scholarships</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2">
-                {new Set(scholarships.map(s => s.country)).size}+
-              </div>
-              <div className="text-blue-100">Countries</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2">
-                {new Set(scholarships.map(s => s.level)).size}+
-              </div>
-              <div className="text-blue-100">Study Levels</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2">100%</div>
-              <div className="text-blue-100">Free Service</div>
-            </div>
+        {/* Pagination */}
+        <div className="flex justify-end items-center mt-12 gap-3">
+          {/* Previous Button */}
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`
+      flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
+      ${
+        currentPage === 1
+          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          : 'bg-white text-blue-600 hover:bg-blue-50 hover:shadow-md border border-gray-200 hover:border-blue-300'
+      }
+    `}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Previous
+          </button>
+
+          {/* Page Numbers */}
+          <div className="flex items-center gap-2">
+            {/* First Page */}
+            {currentPage > 3 && (
+              <>
+                <button
+                  onClick={() => setCurrentPage(1)}
+                  className="w-10 h-10 rounded-lg font-semibold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
+                >
+                  1
+                </button>
+                {currentPage > 4 && (
+                  <span className="px-2 text-gray-400">...</span>
+                )}
+              </>
+            )}
+
+            {/* Page Numbers */}
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum;
+              if (currentPage <= 3) {
+                pageNum = i + 1;
+              } else if (currentPage >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = currentPage - 2 + i;
+              }
+
+              if (pageNum > totalPages || pageNum < 1) return null;
+
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`
+            w-10 h-10 rounded-lg font-semibold transition-all duration-300
+            ${
+              currentPage === pageNum
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105'
+                : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+            }
+          `}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            {/* Last Page */}
+            {currentPage < totalPages - 2 && (
+              <>
+                {currentPage < totalPages - 3 && (
+                  <span className="px-2 text-gray-400">...</span>
+                )}
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="w-10 h-10 rounded-lg font-semibold text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200"
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
           </div>
+
+          {/* Next Button */}
+          <button
+            onClick={() =>
+              setCurrentPage(prev => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className={`
+      flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300
+      ${
+        currentPage === totalPages
+          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          : 'bg-white text-blue-600 hover:bg-blue-50 hover:shadow-md border border-gray-200 hover:border-blue-300'
+      }
+    `}
+          >
+            Next
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
