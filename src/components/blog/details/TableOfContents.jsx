@@ -1,4 +1,3 @@
-// components/blog/TableOfContents.jsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -59,7 +58,7 @@ export function TableOfContents({ content }) {
   };
 
   return (
-    <nav className="rounded-xl bg-white p-6 shadow-sm">
+    <nav className="rounded-xl bg-gray-50  p-6 shadow-sm">
       <h3 className="mb-4 text-lg font-bold text-gray-900">
         Table of Contents
       </h3>

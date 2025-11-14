@@ -305,9 +305,47 @@ export default function BlogPostPage() {
               </div>
 
               {/* Article Content */}
-              <div className="rounded-2xl bg-white p-8 shadow-sm md:p-12">
-                <div
-                  className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h2:mt-12 prose-h2:text-3xl prose-h3:mt-8 prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-blue-600 prose-blockquote:bg-blue-50 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:text-gray-700 prose-blockquote:italic prose-code:rounded prose-code:bg-gray-100 prose-code:px-2 prose-code:py-1 prose-code:text-sm prose-code:font-mono prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-img:rounded-xl prose-img:shadow-lg"
+              <div className="rounded-2xl bg-gradient-to-br from-white to-gray-50 p-8 shadow-xl md:p-12">
+                <article
+                  className={`
+      prose prose-lg max-w-none
+      prose-gray
+
+      /* Make it more readable */
+      [&>*:first-child]:mt-0
+      [&>*:last-child]:mb-0
+
+      /* Custom heading styles */
+      [&_h1]:text-4xl [&_h1]:md:text-5xl [&_h1]:font-bold [&_h1]:text-gray-900
+      [&_h1]:mb-8 [&_h1]:pb-4 [&_h1]:border-b-2 [&_h1]:border-gray-200
+
+      [&_h2]:text-3xl [&_h2]:md:text-4xl [&_h2]:font-semibold [&_h2]:text-gray-800
+      [&_h2]:mt-12 [&_h2]:mb-6
+
+      [&_h3]:text-2xl [&_h3]:md:text-3xl [&_h3]:font-medium [&_h3]:text-gray-700
+      [&_h3]:mt-8 [&_h3]:mb-4
+
+      /* Lists */
+      [&_ol]:list-decimal [&_ol]:ml-8 [&_ol]:space-y-3
+      [&_ul]:list-disc [&_ul]:ml-8 [&_ul]:space-y-3
+      [&_li]:text-gray-700 [&_li]:leading-relaxed
+
+      /* Text formatting */
+      [&_p]:text-gray-700 [&_p]:leading-relaxed [&_p]:mb-6
+      [&_strong]:text-gray-900 [&_strong]:font-semibold
+      [&_u]:underline [&_u]:decoration-blue-500 [&_u]:decoration-2
+      [&_s]:line-through [&_s]:text-gray-500 [&_s]:decoration-red-500
+
+      /* Code blocks */
+      [&_pre]:bg-gray-900 [&_pre]:text-gray-100 [&_pre]:p-6
+      [&_pre]:rounded-xl [&_pre]:shadow-lg [&_pre]:my-8
+      [&_pre]:overflow-x-auto [&_pre]:text-sm
+
+      /* Inline code */
+      [&_code]:bg-blue-50 [&_code]:text-blue-900 [&_code]:px-2
+      [&_code]:py-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+      [&_pre_code]:bg-transparent [&_pre_code]:text-gray-100 [&_pre_code]:p-0
+    `}
                   dangerouslySetInnerHTML={{ __html: post.contentHtml }}
                 />
               </div>
