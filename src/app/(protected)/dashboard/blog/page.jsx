@@ -1,195 +1,196 @@
-'use client';
-import React, { useState } from 'react';
+"use client";
+import Link from "next/link";
+import React, { useState } from "react";
 
 const BlogPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   // Sample blog posts data
   const blogPosts = [
     {
       id: 1,
-      title: 'Top 10 Scholarships for International Students in 2024',
+      title: "Top 10 Scholarships for International Students in 2024",
       excerpt:
-        'Discover the most generous scholarship opportunities for students looking to study abroad this year.',
-      author: 'Sarah Johnson',
-      publishDate: '2024-01-15',
-      category: 'Scholarships',
-      status: 'published',
+        "Discover the most generous scholarship opportunities for students looking to study abroad this year.",
+      author: "Sarah Johnson",
+      publishDate: "2024-01-15",
+      category: "Scholarships",
+      status: "published",
       views: 1247,
       likes: 89,
       comments: 23,
-      readTime: '5 min read',
-      image: '📚',
-      tags: ['scholarships', 'funding', 'international'],
+      readTime: "5 min read",
+      image: "📚",
+      tags: ["scholarships", "funding", "international"],
     },
     {
       id: 2,
-      title: 'How to Write a Winning SOP for Chinese Universities',
+      title: "How to Write a Winning SOP for Chinese Universities",
       excerpt:
-        'Learn the secrets to crafting a compelling Statement of Purpose that will impress admissions committees.',
-      author: 'Michael Chen',
-      publishDate: '2024-01-12',
-      category: 'Application Tips',
-      status: 'published',
+        "Learn the secrets to crafting a compelling Statement of Purpose that will impress admissions committees.",
+      author: "Michael Chen",
+      publishDate: "2024-01-12",
+      category: "Application Tips",
+      status: "published",
       views: 892,
       likes: 67,
       comments: 18,
-      readTime: '7 min read',
-      image: '✍️',
-      tags: ['SOP', 'application', 'china'],
+      readTime: "7 min read",
+      image: "✍️",
+      tags: ["SOP", "application", "china"],
     },
     {
       id: 3,
-      title: 'Living in Malaysia: Cost of Living Guide for Students',
+      title: "Living in Malaysia: Cost of Living Guide for Students",
       excerpt:
-        'A comprehensive breakdown of monthly expenses and budgeting tips for international students in Malaysia.',
-      author: 'Emma Wong',
-      publishDate: '2024-01-10',
-      category: 'Student Life',
-      status: 'published',
+        "A comprehensive breakdown of monthly expenses and budgeting tips for international students in Malaysia.",
+      author: "Emma Wong",
+      publishDate: "2024-01-10",
+      category: "Student Life",
+      status: "published",
       views: 1563,
       likes: 124,
       comments: 45,
-      readTime: '8 min read',
-      image: '🏠',
-      tags: ['malaysia', 'cost', 'living'],
+      readTime: "8 min read",
+      image: "🏠",
+      tags: ["malaysia", "cost", "living"],
     },
     {
       id: 4,
-      title: 'IELTS vs TOEFL: Which is Better for Study Abroad?',
+      title: "IELTS vs TOEFL: Which is Better for Study Abroad?",
       excerpt:
-        'Compare the two most popular English proficiency tests and choose the right one for your goals.',
-      author: 'David Kim',
-      publishDate: '2024-01-08',
-      category: 'Language Tests',
-      status: 'published',
+        "Compare the two most popular English proficiency tests and choose the right one for your goals.",
+      author: "David Kim",
+      publishDate: "2024-01-08",
+      category: "Language Tests",
+      status: "published",
       views: 2105,
       likes: 156,
       comments: 67,
-      readTime: '6 min read',
-      image: '🎯',
-      tags: ['IELTS', 'TOEFL', 'english'],
+      readTime: "6 min read",
+      image: "🎯",
+      tags: ["IELTS", "TOEFL", "english"],
     },
     {
       id: 5,
-      title: 'Cultural Adaptation: Thriving in a New Country',
+      title: "Cultural Adaptation: Thriving in a New Country",
       excerpt:
-        'Practical tips and strategies to help international students adapt to new cultures and environments.',
-      author: 'Lisa Wang',
-      publishDate: '2024-01-18',
-      category: 'Student Life',
-      status: 'draft',
+        "Practical tips and strategies to help international students adapt to new cultures and environments.",
+      author: "Lisa Wang",
+      publishDate: "2024-01-18",
+      category: "Student Life",
+      status: "draft",
       views: 0,
       likes: 0,
       comments: 0,
-      readTime: '10 min read',
-      image: '🌍',
-      tags: ['culture', 'adaptation', 'tips'],
+      readTime: "10 min read",
+      image: "🌍",
+      tags: ["culture", "adaptation", "tips"],
     },
     {
       id: 6,
-      title: 'Scholarship Interview Preparation Guide',
+      title: "Scholarship Interview Preparation Guide",
       excerpt:
-        'Master the art of scholarship interviews with our comprehensive preparation guide and common questions.',
-      author: 'Robert Taylor',
-      publishDate: '2024-01-20',
-      category: 'Scholarships',
-      status: 'scheduled',
+        "Master the art of scholarship interviews with our comprehensive preparation guide and common questions.",
+      author: "Robert Taylor",
+      publishDate: "2024-01-20",
+      category: "Scholarships",
+      status: "scheduled",
       views: 0,
       likes: 0,
       comments: 0,
-      readTime: '9 min read',
-      image: '💼',
-      tags: ['interview', 'preparation', 'scholarships'],
+      readTime: "9 min read",
+      image: "💼",
+      tags: ["interview", "preparation", "scholarships"],
     },
     {
       id: 7,
-      title: 'Top Engineering Programs in Chinese Universities',
+      title: "Top Engineering Programs in Chinese Universities",
       excerpt:
         "Explore the best engineering programs and research opportunities in China's top universities.",
-      author: 'Dr. Zhang Wei',
-      publishDate: '2024-01-22',
-      category: 'Programs',
-      status: 'published',
+      author: "Dr. Zhang Wei",
+      publishDate: "2024-01-22",
+      category: "Programs",
+      status: "published",
       views: 987,
       likes: 78,
       comments: 32,
-      readTime: '11 min read',
-      image: '⚙️',
-      tags: ['engineering', 'china', 'programs'],
+      readTime: "11 min read",
+      image: "⚙️",
+      tags: ["engineering", "china", "programs"],
     },
     {
       id: 8,
-      title: 'Budgeting for International Students: Complete Guide',
+      title: "Budgeting for International Students: Complete Guide",
       excerpt:
-        'Learn how to manage your finances effectively while studying abroad with our budgeting strategies.',
-      author: 'Maria Rodriguez',
-      publishDate: '2024-01-25',
-      category: 'Student Life',
-      status: 'published',
+        "Learn how to manage your finances effectively while studying abroad with our budgeting strategies.",
+      author: "Maria Rodriguez",
+      publishDate: "2024-01-25",
+      category: "Student Life",
+      status: "published",
       views: 1342,
       likes: 112,
       comments: 41,
-      readTime: '12 min read',
-      image: '💰',
-      tags: ['budgeting', 'finance', 'tips'],
+      readTime: "12 min read",
+      image: "💰",
+      tags: ["budgeting", "finance", "tips"],
     },
   ];
 
   // Filter blog posts based on search and filters
-  const filteredPosts = blogPosts.filter(post => {
+  const filteredPosts = blogPosts.filter((post) => {
     const matchesSearch =
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
-      statusFilter === 'all' || post.status === statusFilter;
+      statusFilter === "all" || post.status === statusFilter;
     const matchesCategory =
-      categoryFilter === 'all' || post.category === categoryFilter;
+      categoryFilter === "all" || post.category === categoryFilter;
 
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  const getStatusColor = status => {
+  const getStatusColor = (status) => {
     switch (status) {
-      case 'published':
-        return 'bg-green-100 text-green-800';
-      case 'draft':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'scheduled':
-        return 'bg-blue-100 text-blue-800';
+      case "published":
+        return "bg-green-100 text-green-800";
+      case "draft":
+        return "bg-yellow-100 text-yellow-800";
+      case "scheduled":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getCategoryColor = category => {
+  const getCategoryColor = (category) => {
     switch (category) {
-      case 'Scholarships':
-        return 'bg-purple-100 text-purple-800';
-      case 'Application Tips':
-        return 'bg-blue-100 text-blue-800';
-      case 'Student Life':
-        return 'bg-green-100 text-green-800';
-      case 'Language Tests':
-        return 'bg-orange-100 text-orange-800';
-      case 'Programs':
-        return 'bg-pink-100 text-pink-800';
+      case "Scholarships":
+        return "bg-purple-100 text-purple-800";
+      case "Application Tips":
+        return "bg-blue-100 text-blue-800";
+      case "Student Life":
+        return "bg-green-100 text-green-800";
+      case "Language Tests":
+        return "bg-orange-100 text-orange-800";
+      case "Programs":
+        return "bg-pink-100 text-pink-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const categories = [...new Set(blogPosts.map(post => post.category))];
-  const statuses = ['published', 'draft', 'scheduled'];
+  const categories = [...new Set(blogPosts.map((post) => post.category))];
+  const statuses = ["published", "draft", "scheduled"];
 
-  const formatDate = dateString => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -212,10 +213,13 @@ const BlogPage = () => {
                 <span>📊</span>
                 <span>Analytics</span>
               </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition duration-200 flex items-center space-x-2">
+              <Link
+                href={"./add-blog"}
+                className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition duration-200 flex items-center space-x-2"
+              >
                 <span>✏️</span>
                 <span>Write New Post</span>
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -298,7 +302,7 @@ const BlogPage = () => {
                   type="text"
                   placeholder="Search posts by title, content, or author..."
                   value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
@@ -309,11 +313,11 @@ const BlogPage = () => {
             <div className="flex flex-wrap gap-4">
               <select
                 value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
+                onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               >
                 <option value="all">All Status</option>
-                {statuses.map(status => (
+                {statuses.map((status) => (
                   <option key={status} value={status}>
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </option>
@@ -321,11 +325,11 @@ const BlogPage = () => {
               </select>
               <select
                 value={categoryFilter}
-                onChange={e => setCategoryFilter(e.target.value)}
+                onChange={(e) => setCategoryFilter(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
               >
                 <option value="all">All Categories</option>
-                {categories.map(category => (
+                {categories.map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
@@ -363,7 +367,7 @@ const BlogPage = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPosts.map(post => (
+                {filteredPosts.map((post) => (
                   <tr
                     key={post.id}
                     className="hover:bg-gray-50 transition duration-150"
@@ -429,7 +433,7 @@ const BlogPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-3">
                         <button className="text-blue-600 hover:text-blue-900 text-sm">
-                          {post.status === 'published' ? 'View' : 'Preview'}
+                          {post.status === "published" ? "View" : "Preview"}
                         </button>
                         <button className="text-green-600 hover:text-green-900 text-sm">
                           Edit
@@ -449,8 +453,8 @@ const BlogPage = () => {
           <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-700">
-                Showing{' '}
-                <span className="font-medium">{filteredPosts.length}</span> of{' '}
+                Showing{" "}
+                <span className="font-medium">{filteredPosts.length}</span> of{" "}
                 <span className="font-medium">{blogPosts.length}</span> posts
               </div>
               <div className="flex items-center space-x-2">
@@ -485,9 +489,9 @@ const BlogPage = () => {
             </p>
             <button
               onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('all');
-                setCategoryFilter('all');
+                setSearchTerm("");
+                setStatusFilter("all");
+                setCategoryFilter("all");
               }}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
             >

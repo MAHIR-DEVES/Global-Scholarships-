@@ -15,6 +15,7 @@ const nextConfig = {
       "civilexer.wordpress.com",
       "vectorseek.com",
       "res.cloudinary.com",
+      "cdn.example.com",
     ],
   },
 };

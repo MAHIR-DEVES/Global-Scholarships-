@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* Custom Scrollbar Styling */
 ::-webkit-scrollbar {
@@ -52,4 +52,47 @@
   .sidebar-mobile.open {
     transform: translateX(0);
   }
+}
+
+.prose u {
+  @apply underline decoration-blue-500 decoration-2 underline-offset-2;
+}
+
+.prose s,
+.prose del {
+  @apply line-through decoration-red-500 decoration-2 text-gray-500;
+}
+
+/* Better list styling */
+.prose ol li::marker {
+  @apply text-blue-600 font-bold;
+}
+
+.prose ul li::marker {
+  @apply text-blue-600;
+}
+
+/* Add some hover effects for interactive feel */
+.prose h1:hover,
+.prose h2:hover,
+.prose h3:hover {
+  @apply text-blue-900 transition-colors duration-200;
+}
+
+/* Style for nested lists */
+.prose ol ol,
+.prose ul ul,
+.prose ol ul,
+.prose ul ol {
+  @apply mt-3 ml-6;
+}
+
+/* Better pre/code block styling */
+.prose pre code {
+  @apply text-sm leading-relaxed;
+}
+
+/* Add syntax highlighting theme (optional) */
+.prose pre {
+  @apply bg-gradient-to-br from-gray-900 to-gray-800;
 }
