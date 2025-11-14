@@ -4,26 +4,41 @@ import React, { useState, useEffect } from 'react';
 
 const ScholarshipsPage = () => {
   const [scholarships, setScholarships] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [filters, setFilters] = useState({
     country: [],
     level: [],
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 6;
+
   const countries = ['China', 'Malaysia', 'USA', 'UK', 'Canada', 'Australia'];
   const levels = ['Diploma', 'Bachelor', 'Master', 'PhD'];
 
-  // Fetch Scholarships
+  // Fetch Scholarships from backend with filters & pagination
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllScholarships(filters);
-        setScholarships(data);
+        setLoading(true);
+        const query = {
+          ...filters,
+          page: currentPage,
+          limit: pageSize,
+        };
+        const data = await getAllScholarships(query);
+        setScholarships(data.data || []);
+        setTotalPages(data.totalPages || 1);
       } catch (error) {
-        console.error(error);
+        console.error('Error fetching scholarships:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
-  }, [filters]);
+  }, [filters, currentPage]);
 
   // Handle checkbox change
   const handleCheckboxChange = e => {
@@ -34,6 +49,7 @@ const ScholarshipsPage = () => {
         ? [...prev[name], value]
         : prev[name].filter(item => item !== value),
     }));
+    setCurrentPage(1); // reset to page 1 on filter change
   };
 
   // Clear all filters
@@ -42,30 +58,35 @@ const ScholarshipsPage = () => {
       country: [],
       level: [],
     });
+    setCurrentPage(1);
   };
 
-  return (
-    <div className="max-w-7xl mx-auto  min-h-screen py-5">
-      <div className="flex flex-col lg:flex-row gap-4">
-        {/* Left Sidebar */}
-        <aside className="w-full min-h-screen lg:w-1/4 bg-white rounded-xs shadow-lg p-6 h-fit sticky top-20">
-          <div className="border-b border-gray-200 pb-4 mb-6">
-            <h2 className="text-xl font-bold text-gray-800">Filters</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Find your perfect scholarship
-            </p>
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 text-lg">Loading scholarships...</p>
+        </div>
+      </div>
+    );
+  }
 
-            <p className="text-gray-600 ">
-              {scholarships.length} scholarships found
-            </p>
-          </div>
+  return (
+    <div className="max-w-7xl mx-auto min-h-screen py-5 px-4">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Left Sidebar */}
+        <aside className="w-full lg:w-1/4 bg-white rounded-xl shadow-lg p-6 sticky top-20 h-fit">
+          <h2 className="text-xl font-bold mb-2">Filters</h2>
+          <p className="text-gray-500 mb-4">Find your perfect scholarship</p>
+          <p className="text-gray-600 mb-4">
+            {scholarships.length} scholarships found
+          </p>
 
           {/* Country Filter */}
-          <div className="mb-8">
-            <label className="block text-sm font-semibold text-gray-700 mb-4">
-              Country
-            </label>
-            <div className="space-y-3">
+          <div className="mb-6">
+            <label className="block font-semibold mb-2">Country</label>
+            <div className="space-y-2">
               {countries.map(country => (
                 <div key={country} className="flex items-center">
                   <input
@@ -75,11 +96,11 @@ const ScholarshipsPage = () => {
                     value={country}
                     checked={filters.country.includes(country)}
                     onChange={handleCheckboxChange}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                   />
                   <label
                     htmlFor={`country-${country}`}
-                    className="ml-3 text-sm font-medium text-gray-700 cursor-pointer"
+                    className="ml-2 text-sm cursor-pointer"
                   >
                     {country}
                   </label>
@@ -89,11 +110,9 @@ const ScholarshipsPage = () => {
           </div>
 
           {/* Level Filter */}
-          <div className="mb-8">
-            <label className="block text-sm font-semibold text-gray-700 mb-4">
-              Study Level
-            </label>
-            <div className="space-y-3">
+          <div className="mb-6">
+            <label className="block font-semibold mb-2">Study Level</label>
+            <div className="space-y-2">
               {levels.map(level => (
                 <div key={level} className="flex items-center">
                   <input
@@ -103,11 +122,11 @@ const ScholarshipsPage = () => {
                     value={level}
                     checked={filters.level.includes(level)}
                     onChange={handleCheckboxChange}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                   />
                   <label
                     htmlFor={`level-${level}`}
-                    className="ml-3 text-sm font-medium text-gray-700 cursor-pointer"
+                    className="ml-2 text-sm cursor-pointer"
                   >
                     {level}
                   </label>
@@ -116,166 +135,126 @@ const ScholarshipsPage = () => {
             </div>
           </div>
 
-          {/* Selected Filters Display */}
-          {(filters.country.length > 0 || filters.level.length > 0) && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <h3 className="text-sm font-semibold text-gray-700 mb-2">
-                Active Filters:
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {filters.country.map(country => (
-                  <span
-                    key={country}
-                    className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                  >
-                    {country}
-                  </span>
-                ))}
-                {filters.level.map(level => (
-                  <span
-                    key={level}
-                    className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
-                  >
-                    {level}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Reset Button */}
           <button
             onClick={clearAllFilters}
-            className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg"
+            className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 rounded-xl font-medium hover:from-gray-700 hover:to-gray-800 transition-all duration-200"
           >
             Reset All Filters
           </button>
         </aside>
 
-        {/* Right Side: Scholarship List */}
-        <main className="w-full lg:w-3/4 space-y-3">
+        {/* Right Side: Scholarships List */}
+        <main className="w-full lg:w-3/4 space-y-4">
           {scholarships.length === 0 ? (
-            <div className="bg-white rounded-xs shadow-lg p-12 text-center">
-              <div className="text-gray-400 mb-4">
-                <svg
-                  className="w-16 h-16 mx-auto"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M12 14l9-5-9-5-9 5 9 5z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                No scholarships found
-              </h3>
+            <div className="bg-white rounded-xl shadow-lg p-12 text-center">
               <p className="text-gray-500">
-                Try adjusting your filters to see more results
+                No scholarships found. Try adjusting filters.
               </p>
             </div>
           ) : (
             scholarships.map(sch => (
               <div
                 key={sch._id}
-                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-100"
+                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-100"
               >
-                <div className="flex flex-col lg:flex-row gap-6">
-                  {/* University Info */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className="flex-shrink-0">
-                      <img
-                        src={sch.universityLogo}
-                        alt={sch.universityName}
-                        className="w-16 h-16 rounded-lg object-cover border border-gray-200 shadow-sm"
-                      />
-                    </div>
+                    <img
+                      src={sch.universityLogo}
+                      alt={sch.universityName}
+                      className="w-20 h-20 rounded-xl object-cover border border-gray-200"
+                    />
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-800 mb-2">
+                      <h3 className="text-lg font-bold">
                         {sch.universityName}
                       </h3>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200">
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        <span className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-200">
                           {sch.level}
                         </span>
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-200">
+                        <span className="px-2 py-1 bg-green-50 text-green-700 text-xs rounded-full border border-green-200">
                           {sch.country}
                         </span>
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-medium border border-purple-200">
-                          Rank #{sch.worldRanking}
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-gray-600 text-sm">
-                          📅 Deadline:{' '}
-                          <span className="font-semibold text-gray-800">
-                            {sch.applicationDeadline}
+                        {sch.worldRanking && (
+                          <span className="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-full border border-purple-200">
+                            Rank: #{sch.worldRanking}
                           </span>
-                        </p>
-                        {sch.scholarshipAmount && (
-                          <p className="text-sm text-amber-600 font-semibold">
-                            💰 {sch.scholarshipAmount}
-                          </p>
                         )}
                       </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Deadline:{' '}
+                        <span className="font-semibold">
+                          {sch.applicationDeadline}
+                        </span>
+                      </p>
+                      {sch.scholarshipAmount && (
+                        <p className="text-sm text-amber-600 font-semibold">
+                          🎓 Scholarship: {sch.scholarshipAmount}
+                        </p>
+                      )}
                     </div>
                   </div>
-
-                  {/* Action Buttons - Vertical Stack */}
-                  <div className="flex flex-col gap-3 min-w-[180px]">
-                    <button className="w-full inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg text-sm">
-                      <svg
-                        className="w-4 h-4 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      View Details
+                  <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                      View
                     </button>
-
                     <a
                       href={sch.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-all duration-200 shadow-md hover:shadow-lg text-sm"
+                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
                     >
-                      <svg
-                        className="w-4 h-4 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                        />
-                      </svg>
-                      Visit Website
+                      Visit
                     </a>
                   </div>
                 </div>
               </div>
             ))
           )}
+
+          {/* Pagination */}
+          <div className="flex justify-end items-center mt-12 gap-3">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-blue-600 hover:bg-blue-50 hover:shadow-md border border-gray-200 hover:border-blue-300'
+              }`}
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`w-10 h-10 rounded-lg font-semibold transition-all duration-300 ${
+                  currentPage === i + 1
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105'
+                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() =>
+                setCurrentPage(prev => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-blue-600 hover:bg-blue-50 hover:shadow-md border border-gray-200 hover:border-blue-300'
+              }`}
+            >
+              Next
+            </button>
+          </div>
         </main>
       </div>
     </div>
