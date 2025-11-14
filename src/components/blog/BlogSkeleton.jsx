@@ -1,7 +1,7 @@
 export function BlogSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <div className="h-48 bg-gray-200"></div>
         <div className="p-6">
           <div className="mb-3 flex gap-2">

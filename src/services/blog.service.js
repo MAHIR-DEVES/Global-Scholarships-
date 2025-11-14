@@ -48,7 +48,7 @@ class BlogService {
    */
   async getBlogPosts(params = {}) {
     try {
-      const { data } = await this.axiosInstance.get("/blogs", {
+      const { data } = await this.axiosInstance.get("/blog", {
         params: {
           page: params.page || 1,
           limit: params.limit || 9,
@@ -69,7 +69,7 @@ class BlogService {
    */
   async getBlogBySlug(slug) {
     try {
-      const { data } = await this.axiosInstance.get(`/blogs/${slug}`);
+      const { data } = await this.axiosInstance.get(`/blog/${slug}`);
       return data.data || data; // Handle both wrapped and unwrapped responses
     } catch (error) {
       console.error("Error fetching blog post:", error);
@@ -83,7 +83,7 @@ class BlogService {
   async getCategories() {
     try {
       // First, get all published posts to extract categories
-      const { data } = await this.axiosInstance.get("/blogs", {
+      const { data } = await this.axiosInstance.get("/blog", {
         params: {
           limit: 50, // Get max allowed to get more categories
           status: "published",
@@ -108,7 +108,7 @@ class BlogService {
    */
   async getFeaturedPosts(limit = 3) {
     try {
-      const { data } = await this.axiosInstance.get("/blogs", {
+      const { data } = await this.axiosInstance.get("/blog", {
         params: {
           limit,
           status: "published",

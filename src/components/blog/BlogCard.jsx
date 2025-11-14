@@ -10,7 +10,7 @@ export function BlogCard({ post, className }) {
   return (
     <article
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border bg-white shadow-sm transition-all hover:shadow-lg",
+        "group relative flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-lg",
         className
       )}
     >
