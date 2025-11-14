@@ -1,4 +1,3 @@
-// services/blog.service.js
 import axios from "axios";
 
 const API_BASE_URL =
