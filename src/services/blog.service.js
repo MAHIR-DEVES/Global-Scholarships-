@@ -69,8 +69,16 @@ class BlogService {
    */
   async getBlogBySlug(slug) {
     try {
+      // If your API returns the full post data directly
       const { data } = await this.axiosInstance.get(`/blog/${slug}`);
-      return data.data || data; // Handle both wrapped and unwrapped responses
+
+      // Handle if the response is wrapped in a data property
+      if (data.data) {
+        return data.data;
+      }
+
+      // Or if it's direct
+      return data;
     } catch (error) {
       console.error("Error fetching blog post:", error);
       throw error;

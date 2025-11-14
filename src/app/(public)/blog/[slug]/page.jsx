@@ -25,10 +25,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { ShareButtons } from "@/components/blog/details/SharedButton";
+import { AuthorCard } from "@/components/blog/details/AuthorCard";
 import { BlogCard } from "@/components/blog/BlogCard";
-import { TableOfContents } from "@/components/blog/TableOfContents";
-import { AuthorCard } from "@/components/blog/AuthorCard";
-import { ShareButtons } from "@/components/blog/ShareButtons";
+import { TableOfContents } from "@/components/blog/details/TableOfContents";
 
 export default function BlogPostPage() {
   const { slug } = useParams();
