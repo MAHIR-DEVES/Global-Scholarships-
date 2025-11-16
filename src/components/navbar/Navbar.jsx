@@ -60,7 +60,10 @@ const Navbar = ({ className }) => {
       href: '/#',
       icon: '🎓',
       submenu: [
-        { name: 'Gov. Scholarships', href: '/scholarships/gov-scholarship' },
+        {
+          name: 'Gov. Scholarships',
+          href: 'https://shed.gov.bd/site/view/scholarship/Scholarship-Notification',
+        },
         { name: 'All Scholarships', href: '/scholarships/all-scholarships' },
       ],
     },
@@ -183,6 +186,14 @@ const Navbar = ({ className }) => {
                       <Link
                         key={sub.name}
                         href={sub.href}
+                        target={
+                          sub.name === 'Gov. Scholarships' ? '_blank' : '_self'
+                        }
+                        rel={
+                          sub.name === 'Gov. Scholarships'
+                            ? 'noopener noreferrer'
+                            : ''
+                        }
                         className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200"
                       >
                         {sub.name}
@@ -367,6 +378,16 @@ const Navbar = ({ className }) => {
                           <Link
                             key={sub.name}
                             href={sub.href}
+                            target={
+                              sub.name === 'Gov. Scholarships'
+                                ? '_blank'
+                                : '_self'
+                            }
+                            rel={
+                              sub.name === 'Gov. Scholarships'
+                                ? 'noopener noreferrer'
+                                : ''
+                            }
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="block px-3 py-2 rounded-lg text-gray-600 hover:bg-blue-50 hover:text-blue-600"
                           >
