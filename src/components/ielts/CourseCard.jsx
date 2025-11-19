@@ -11,7 +11,7 @@ const CourseCard = ({ course }) => {
   const displayPrice = price === 0 ? "Free" : `$${price.toFixed(2)}`;
 
   return (
-    <Link href={`/courses/${slug || _id}`} className="group block">
+    <Link href={`/ielts/${slug || _id}`} className="group block">
       <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
         {/* Course Thumbnail */}
         <div className="relative w-full h-48">
