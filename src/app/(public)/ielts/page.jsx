@@ -8,7 +8,6 @@ async function getCourses() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
     const res = await fetch(`${apiUrl}/api/courses`, {
-      // 'no-store' ensures we get fresh data on every request.
       // Use 'revalidate' for data that doesn't change often.
       cache: "no-store",
     });
