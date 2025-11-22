@@ -1,8 +1,9 @@
 import React from "react";
 import Image from "next/image";
+import EnrollmentAction from "./EnrollmentAction";
 
 const CourseHero = ({ course }) => {
-  const { title, description, instructor, price } = course;
+  const { _id, title, description, instructor, price } = course;
   const displayPrice = price === 0 ? "Free" : `$${price.toFixed(2)}`;
 
   return (
@@ -17,9 +18,7 @@ const CourseHero = ({ course }) => {
       </div>
       <div className="flex items-center gap-6">
         <span className="text-3xl font-extrabold">{displayPrice}</span>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">
-          Enroll Now
-        </button>
+        <EnrollmentAction courseId={_id} price={price} />
       </div>
     </div>
   );

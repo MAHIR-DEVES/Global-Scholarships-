@@ -1,8 +1,8 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import CoursePlayer from "./CoursePlayer";
 import api from "@/utils/api"; // Assume this is your configured Axios instance
 import { headers } from "next/headers"; // To pass auth cookies
+import CoursePlayer from "./CoursePlayer";
 
 // Fetch course content AND user's progress for that course
 async function getCourseWatchData(slug) {

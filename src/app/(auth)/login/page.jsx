@@ -28,8 +28,7 @@ const LoginPage = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "https://global-scholarships-server-five.vercel.app/api/users/login",
+      const response = await axios.post( process.env.NEXT_PUBLIC_API_URL + "/api/users/login",
         formData,
         {
           headers: {
