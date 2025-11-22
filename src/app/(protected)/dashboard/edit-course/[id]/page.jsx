@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 const EditCoursePage = ({ params }) => {
   const router = useRouter();
-  const { id } = params; // Course ID from URL
+  const { id } = React.use(params);
 
   const [courseData, setCourseData] = useState({
     title: "",
