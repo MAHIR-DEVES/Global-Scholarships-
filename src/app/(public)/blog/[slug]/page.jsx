@@ -1,4 +1,3 @@
-// app/blog/[slug]/page.jsx
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
@@ -7,17 +6,10 @@ import { blogService } from "@/services/blog.service";
 import { format } from "date-fns";
 import {
   Calendar,
-  User,
   ArrowLeft,
   Clock,
-  Share2,
-  Twitter,
-  Facebook,
-  Linkedin,
-  Link2,
   BookOpen,
   Heart,
-  MessageCircle,
   Bookmark,
   ChevronUp,
 } from "lucide-react";
@@ -26,8 +18,6 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { ShareButtons } from "@/components/blog/details/SharedButton";
-import { AuthorCard } from "@/components/blog/details/AuthorCard";
-import { BlogCard } from "@/components/blog/BlogCard";
 import { TableOfContents } from "@/components/blog/details/TableOfContents";
 
 export default function BlogPostPage() {
@@ -48,6 +38,25 @@ export default function BlogPostPage() {
     queryKey: ["blog-post", slug],
     queryFn: () => blogService.getBlogBySlug(slug),
   });
+
+  // Initialize likes when post loads
+  useEffect(() => {
+    if (post) {
+      const backendLikes = post.likes || 0;
+      setLikes(backendLikes);
+
+      // Check if user has already liked this post locally
+      const liked = localStorage.getItem(`liked-${post._id}`);
+
+      // If localStorage says liked but backend count is 0, clear localStorage
+      if (liked && backendLikes === 0) {
+        localStorage.removeItem(`liked-${post._id}`);
+        setHasLiked(false);
+      } else if (liked) {
+        setHasLiked(true);
+      }
+    }
+  }, [post]);
 
   // Fetch related posts
   const { data: relatedPosts = [] } = useQuery({
@@ -89,16 +98,35 @@ export default function BlogPostPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLike = () => {
-    if (!hasLiked) {
-      setLikes((prev) => prev + 1);
-      setHasLiked(true);
-      // Save to localStorage or send to API
+  const handleLike = async () => {
+    if (!post) return;
+
+    const newHasLiked = !hasLiked;
+    const newLikes = newHasLiked ? likes + 1 : Math.max(0, likes - 1); // Prevent negative
+    const action = newHasLiked ? "like" : "unlike";
+
+    // Optimistic update
+    setHasLiked(newHasLiked);
+    setLikes(newLikes);
+
+    if (newHasLiked) {
       localStorage.setItem(`liked-${post._id}`, "true");
     } else {
-      setLikes((prev) => prev - 1);
-      setHasLiked(false);
       localStorage.removeItem(`liked-${post._id}`);
+    }
+
+    try {
+      await blogService.likeBlogPost(post._id, action);
+    } catch (error) {
+      // Revert on error
+      setHasLiked(!newHasLiked);
+      setLikes(likes);
+      if (!newHasLiked) {
+        localStorage.setItem(`liked-${post._id}`, "true");
+      } else {
+        localStorage.removeItem(`liked-${post._id}`);
+      }
+      console.error("Failed to like/unlike post:", error);
     }
   };
 
@@ -124,7 +152,7 @@ export default function BlogPostPage() {
   // Error state
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-20">
+      <div className="min-h-screen bg-gray-50 py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="mx-auto max-w-md">
             <div className="mb-6 text-6xl">📝</div>
@@ -150,253 +178,193 @@ export default function BlogPostPage() {
   return (
     <>
       {/* Reading Progress Bar */}
-      <div className="fixed left-0 top-0 z-50 h-1 w-full bg-gray-200">
+      <div className="fixed left-0 top-0 z-50 h-1 w-full bg-gray-100">
         <div
-          className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-100"
+          className="h-full bg-blue-600 transition-all duration-100"
           style={{ width: `${readingProgress}%` }}
         />
       </div>
 
-      {/* Main Article */}
-      <article className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-purple-600 pb-20 pt-32">
-          <div className="absolute inset-0 bg-black/20"></div>
+      <article className="min-h-screen bg-white pb-20 pt-24 overflow-x-hidden">
+        {/* Container for the whole page content */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
 
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute left-1/4 top-1/4 h-72 w-72 rounded-full bg-white blur-3xl"></div>
-            <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-purple-200 blur-3xl"></div>
-          </div>
+          {/* Breadcrumb */}
+          <nav className="mb-8 flex items-center space-x-2 text-sm text-gray-500 overflow-hidden whitespace-nowrap">
+            <Link href="/" className="hover:text-blue-600 transition-colors">
+              Home
+            </Link>
+            <span>/</span>
+            <Link href="/blog" className="hover:text-blue-600 transition-colors">
+              Blog
+            </Link>
+            <span>/</span>
+            <span className="text-gray-900 font-medium truncate">{post.title}</span>
+          </nav>
 
-          <div className="container relative mx-auto max-w-6xl px-4">
-            {/* Breadcrumb */}
-            <nav className="mb-8 flex items-center space-x-2 text-sm text-white/80">
-              <Link href="/" className="hover:text-white">
-                Home
-              </Link>
-              <span>/</span>
-              <Link href="/blog" className="hover:text-white">
-                Blog
-              </Link>
-              <span>/</span>
-              <span className="text-white">{post.categories[0]?.name}</span>
-            </nav>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
-            {/* Title and Meta */}
-            <div className="mx-auto max-w-4xl">
-              {/* Categories */}
-              <div className="mb-6 flex flex-wrap gap-2">
-                {post.categories.map((category, idx) => (
-                  <span
-                    key={idx}
-                    className="rounded-full bg-white/20 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm"
-                  >
-                    {category.name}
-                  </span>
-                ))}
-              </div>
+            {/* Main Content Column (Left/Center) */}
+            <main className="lg:col-span-8 min-w-0">
 
-              {/* Title */}
-              <h1 className="mb-6 text-4xl font-bold leading-tight text-white md:text-5xl lg:text-6xl">
-                {post.title}
-              </h1>
+              {/* Header Section */}
+              <header className="mb-10">
+                {/* Categories */}
+                <div className="mb-6 flex flex-wrap gap-2">
+                  {post.categories.map((category, idx) => (
+                    <span
+                      key={idx}
+                      className="rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-600"
+                    >
+                      {category.name}
+                    </span>
+                  ))}
+                </div>
 
-              {/* Excerpt */}
-              <p className="mb-8 text-lg text-white/90 md:text-xl">
-                {post.excerpt}
-              </p>
+                {/* Title */}
+                <h1 className="mb-6 text-3xl sm:text-4xl md:text-5xl font-bold leading-tight text-gray-900 tracking-tight break-words">
+                  {post.title}
+                </h1>
 
-              {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-6 text-white/80">
-                <div className="flex items-center gap-2">
-                  <div className="h-10 w-10 rounded-full bg-white/20 p-0.5">
-                    <div className="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-                      {post.author.name[0]}
+                {/* Excerpt */}
+                <p className="mb-8 text-lg sm:text-xl text-gray-600 leading-relaxed break-words">
+                  {post.excerpt}
+                </p>
+
+                {/* Author & Meta */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-y border-gray-100 py-6">
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500">
+                        <Calendar className="h-4 w-4" />
+                        <time dateTime={post.publishedAt}>
+                          {format(new Date(post.publishedAt), "MMM dd, yyyy")}
+                        </time>
+                        <span className="hidden sm:inline">•</span>
+                        <Clock className="h-4 w-4 ml-1" />
+                        <span>{calculateReadingTime(post.contentHtml)} min read</span>
                     </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-white">{post.author.name}</p>
-                    <p className="text-sm text-white/70">{post.author.email}</p>
+
+                  <div className="flex items-center gap-3">
+                     <ShareButtons post={post} />
+                     <button
+                        onClick={handleBookmark}
+                        className={cn(
+                          "p-2 rounded-full transition-colors",
+                          isBookmarked
+                            ? "bg-blue-50 text-blue-600"
+                            : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                        )}
+                        title="Bookmark"
+                      >
+                        <Bookmark className={cn("h-5 w-5", isBookmarked && "fill-current")} />
+                      </button>
                   </div>
                 </div>
+              </header>
 
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <time dateTime={post.publishedAt}>
-                    {format(new Date(post.publishedAt), "MMMM dd, yyyy")}
-                  </time>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{calculateReadingTime(post.contentHtml)} min read</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  <span>
-                    {post.contentHtml?.split(/\s+/).length || 0} words
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Content Section */}
-        <div className="container mx-auto max-w-6xl px-4 py-12">
-          <div className="grid gap-8 lg:grid-cols-[1fr_300px]">
-            {/* Main Content */}
-            <div className="mx-auto w-full max-w-4xl">
               {/* Featured Image */}
               {post.coverImageUrl[0] && (
-                <div className="-mt-24 mb-12 overflow-hidden rounded-2xl shadow-2xl">
+                <div className="mb-12 relative w-full aspect-video overflow-hidden rounded-2xl shadow-sm border border-gray-100">
                   <Image
                     src={post.coverImageUrl[0]}
                     alt={post.title}
-                    width={1200}
-                    height={600}
-                    className="h-auto w-full object-cover"
+                    fill
+                    className="object-cover"
                     priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px"
                   />
                 </div>
               )}
-
-              {/* Action Buttons */}
-              <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleLike}
-                    className={cn(
-                      "flex items-center gap-2 rounded-lg px-4 py-2 transition-all",
-                      hasLiked
-                        ? "bg-red-50 text-red-600"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    )}
-                  >
-                    <Heart
-                      className={cn("h-5 w-5", hasLiked && "fill-current")}
-                    />
-                    <span>{likes || 0}</span>
-                  </button>
-
-                  <button className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-gray-600 transition-colors hover:bg-gray-200">
-                    <MessageCircle className="h-5 w-5" />
-                    <span>0</span>
-                  </button>
-
-                  <button
-                    onClick={handleBookmark}
-                    className={cn(
-                      "flex items-center gap-2 rounded-lg px-4 py-2 transition-all",
-                      isBookmarked
-                        ? "bg-blue-50 text-blue-600"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    )}
-                  >
-                    <Bookmark
-                      className={cn("h-5 w-5", isBookmarked && "fill-current")}
-                    />
-                  </button>
-                </div>
-
-                <ShareButtons post={post} />
-              </div>
 
               {/* Article Content */}
-              <div className="rounded-2xl bg-gradient-to-br from-white to-gray-50 p-8 shadow-xl md:p-12">
-                <article
-                  className={`
-      prose prose-lg max-w-none
-      prose-gray
-
-      /* Make it more readable */
-      [&>*:first-child]:mt-0
-      [&>*:last-child]:mb-0
-
-      /* Custom heading styles */
-      [&_h1]:text-4xl [&_h1]:md:text-5xl [&_h1]:font-bold [&_h1]:text-gray-900
-      [&_h1]:mb-8 [&_h1]:pb-4 [&_h1]:border-b-2 [&_h1]:border-gray-200
-
-      [&_h2]:text-3xl [&_h2]:md:text-4xl [&_h2]:font-semibold [&_h2]:text-gray-800
-      [&_h2]:mt-12 [&_h2]:mb-6
-
-      [&_h3]:text-2xl [&_h3]:md:text-3xl [&_h3]:font-medium [&_h3]:text-gray-700
-      [&_h3]:mt-8 [&_h3]:mb-4
-
-      /* Lists */
-      [&_ol]:list-decimal [&_ol]:ml-8 [&_ol]:space-y-3
-      [&_ul]:list-disc [&_ul]:ml-8 [&_ul]:space-y-3
-      [&_li]:text-gray-700 [&_li]:leading-relaxed
-
-      /* Text formatting */
-      [&_p]:text-gray-700 [&_p]:leading-relaxed [&_p]:mb-6
-      [&_strong]:text-gray-900 [&_strong]:font-semibold
-      [&_u]:underline [&_u]:decoration-blue-500 [&_u]:decoration-2
-      [&_s]:line-through [&_s]:text-gray-500 [&_s]:decoration-red-500
-
-      /* Code blocks */
-      [&_pre]:bg-gray-900 [&_pre]:text-gray-100 [&_pre]:p-6
-      [&_pre]:rounded-xl [&_pre]:shadow-lg [&_pre]:my-8
-      [&_pre]:overflow-x-auto [&_pre]:text-sm
-
-      /* Inline code */
-      [&_code]:bg-blue-50 [&_code]:text-blue-900 [&_code]:px-2
-      [&_code]:py-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
-      [&_pre_code]:bg-transparent [&_pre_code]:text-gray-100 [&_pre_code]:p-0
-    `}
-                  dangerouslySetInnerHTML={{ __html: post.contentHtml }}
-                />
+              <div className="prose prose-lg prose-slate max-w-none break-words
+                prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900
+                prose-p:text-gray-700 prose-p:leading-8
+                prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+                prose-img:rounded-xl prose-img:shadow-sm prose-img:w-full prose-img:h-auto
+                prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
+                prose-code:text-blue-600 prose-code:bg-blue-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
+                prose-pre:bg-gray-900 prose-pre:text-gray-50 prose-pre:shadow-lg prose-pre:rounded-xl prose-pre:overflow-x-auto
+              ">
+                <div dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
               </div>
 
-              {/* Author Card */}
-              <AuthorCard author={post.author} />
+              {/* Tags/Footer of Article */}
+              <div className="mt-12 pt-8 border-t border-gray-100">
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={handleLike}
+                            className={cn(
+                            "flex items-center gap-2 rounded-full px-6 py-2.5 transition-all font-medium border",
+                            hasLiked
+                                ? "bg-red-50 text-red-600 border-red-100"
+                                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-red-200 hover:text-red-500"
+                            )}
+                        >
+                            <Heart className={cn("h-5 w-5", hasLiked && "fill-current")} />
+                            <span>{likes || 0} Likes</span>
+                        </button>
+                    </div>
+                 </div>
+              </div>
 
-              {/* Related Posts */}
-              {relatedPosts.length > 0 && (
-                <div className="mt-12">
-                  <h2 className="mb-8 text-3xl font-bold text-gray-900">
-                    Related Articles
-                  </h2>
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {relatedPosts.map((relatedPost) => (
-                      <BlogCard key={relatedPost._id} post={relatedPost} />
-                    ))}
+            </main>
+
+            {/* Sidebar (Right) */}
+            <aside className="lg:col-span-4 space-y-8">
+              <div className="sticky top-32 space-y-8">
+
+                {/* Table of Contents */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-blue-600" />
+                        Table of Contents
+                    </h3>
+                    <TableOfContents content={post.contentHtml} />
+                </div>
+
+                {/* Newsletter Widget */}
+                <div className="rounded-2xl bg-blue-600 p-8 text-white shadow-lg relative overflow-hidden">
+                   <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                   <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl"></div>
+
+                  <h3 className="mb-2 text-xl font-bold relative z-10">Weekly Newsletter</h3>
+                  <p className="mb-6 text-blue-100 text-sm relative z-10">
+                    Join 10,000+ students getting scholarship updates.
+                  </p>
+                  <div className="space-y-3 relative z-10">
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        className="w-full rounded-lg px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/50"
+                    />
+                    <button className="w-full rounded-lg bg-white py-3 font-semibold text-blue-600 hover:bg-blue-50 transition-colors">
+                        Subscribe Free
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {/* Comments Section */}
-              <div className="mt-12 rounded-2xl bg-white p-8 shadow-sm">
-                <h2 className="mb-6 text-2xl font-bold text-gray-900">
-                  Comments
-                </h2>
-                <p className="text-gray-600">Comments feature coming soon...</p>
-              </div>
-            </div>
-
-            {/* Sidebar */}
-            <aside className="hidden lg:block">
-              <div className="sticky top-24 space-y-6">
-                {/* Table of Contents */}
-                <TableOfContents content={post.contentHtml} />
-
-                {/* Newsletter */}
-                <div className="rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 p-6 text-white">
-                  <h3 className="mb-2 text-lg font-bold">Stay Updated</h3>
-                  <p className="mb-4 text-sm text-white/90">
-                    Get scholarship tips and updates delivered to your inbox
-                  </p>
-                  <input
-                    type="email"
-                    placeholder="Your email"
-                    className="mb-3 w-full rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500"
-                  />
-                  <button className="w-full rounded-lg bg-white py-2 font-medium text-blue-600 transition-opacity hover:opacity-90">
-                    Subscribe
-                  </button>
-                </div>
+                {/* Related Posts Widget */}
+                {relatedPosts.length > 0 && (
+                    <div>
+                        <h3 className="font-bold text-gray-900 mb-4">Related Articles</h3>
+                        <div className="space-y-4">
+                            {relatedPosts.map(post => (
+                                <Link key={post._id} href={`/blog/${post.slug}`} className="group block bg-white rounded-xl border border-gray-100 p-4 hover:border-blue-200 hover:shadow-md transition-all">
+                                    <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+                                        {post.title}
+                                    </h4>
+                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                        <Clock className="h-3 w-3" />
+                                        <span>{calculateReadingTime(post.contentHtml)} min read</span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
               </div>
             </aside>
           </div>
@@ -407,7 +375,7 @@ export default function BlogPostPage() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-40 rounded-full bg-blue-600 p-3 text-white shadow-lg transition-all hover:bg-blue-700"
+          className="fixed bottom-8 right-8 z-40 rounded-full bg-blue-600 p-3 text-white shadow-xl transition-all hover:bg-blue-700 hover:-translate-y-1"
           aria-label="Scroll to top"
         >
           <ChevronUp className="h-6 w-6" />
@@ -420,29 +388,46 @@ export default function BlogPostPage() {
 // Skeleton Component
 function BlogDetailSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="bg-gradient-to-br from-blue-600 to-purple-600 pb-20 pt-32">
-        <div className="container mx-auto max-w-4xl px-4">
-          <div className="animate-pulse">
-            <div className="mb-6 flex gap-2">
-              <div className="h-8 w-24 rounded-full bg-white/20"></div>
-              <div className="h-8 w-32 rounded-full bg-white/20"></div>
-            </div>
-            <div className="mb-6 h-12 w-3/4 rounded bg-white/20"></div>
-            <div className="mb-8 h-6 w-full rounded bg-white/20"></div>
-            <div className="flex gap-6">
-              <div className="h-10 w-32 rounded bg-white/20"></div>
-              <div className="h-10 w-40 rounded bg-white/20"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="container mx-auto max-w-4xl px-4 py-12">
-        <div className="-mt-24 mb-12 h-96 rounded-2xl bg-gray-200"></div>
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-4 w-full rounded bg-gray-200"></div>
-          ))}
+    <div className="min-h-screen bg-white pt-24 pb-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <main className="lg:col-span-8">
+                <div className="animate-pulse space-y-8">
+                    <div className="flex gap-2">
+                        <div className="h-8 w-24 rounded-full bg-gray-200"></div>
+                        <div className="h-8 w-32 rounded-full bg-gray-200"></div>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="h-12 w-3/4 rounded-lg bg-gray-200"></div>
+                        <div className="h-12 w-1/2 rounded-lg bg-gray-200"></div>
+                    </div>
+                    <div className="h-6 w-full rounded bg-gray-200"></div>
+
+                    <div className="flex items-center justify-between py-6 border-y border-gray-100">
+                        <div className="flex items-center gap-4">
+                            <div className="h-12 w-12 rounded-full bg-gray-200"></div>
+                            <div className="space-y-2">
+                                <div className="h-4 w-32 rounded bg-gray-200"></div>
+                                <div className="h-3 w-24 rounded bg-gray-200"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="h-96 w-full rounded-2xl bg-gray-200"></div>
+
+                    <div className="space-y-4">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="h-4 w-full rounded bg-gray-200"></div>
+                        ))}
+                    </div>
+                </div>
+            </main>
+            <aside className="hidden lg:block lg:col-span-4">
+                <div className="space-y-8">
+                    <div className="h-64 rounded-2xl bg-gray-200"></div>
+                    <div className="h-48 rounded-2xl bg-gray-200"></div>
+                </div>
+            </aside>
         </div>
       </div>
     </div>
