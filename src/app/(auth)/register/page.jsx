@@ -22,7 +22,6 @@ const RegisterPage = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // ✅ Fixed: No TypeScript types, works in JSX
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -64,7 +63,7 @@ const RegisterPage = () => {
 
       // Send data to backend API
       const res = await axios.post(
-        "https://global-scholarships-server-five.vercel.app/api/users",
+        process.env.NEXT_PUBLIC_API_URL + "/api/users",
         mappedData,
         {
           headers: { "Content-Type": "application/json" },

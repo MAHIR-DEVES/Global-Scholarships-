@@ -4,7 +4,6 @@ import CourseHero from "@/components/courses/CourseHero";
 import CourseCurriculum from "@/components/courses/CourseCurriculum";
 
 // --- Data Fetching Function ---
-// Fetches a single course. Your backend must support fetching by slug or ID.
 async function getCourse(slug) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
