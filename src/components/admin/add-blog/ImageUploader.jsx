@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function ImageUploader({
@@ -8,10 +8,17 @@ export default function ImageUploader({
   maxImages = 5,
   onImagesChange,
   error,
+  initialImages = [],
 }) {
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState(initialImages);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+
+  useEffect(() => {
+    if (initialImages && initialImages.length > 0) {
+        setImages(initialImages);
+    }
+  }, [initialImages]);
 
   const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);

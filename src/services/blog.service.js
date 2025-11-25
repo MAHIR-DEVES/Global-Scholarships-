@@ -129,6 +129,23 @@ class BlogService {
       return [];
     }
   }
+
+  /**
+   * Like or unlike a blog post
+   * @param {string} id - Blog post ID
+   * @param {'like'|'unlike'} action - Action to perform
+   */
+  async likeBlogPost(id, action = "like") {
+    try {
+      const { data } = await this.axiosInstance.patch(`/blog/${id}/like`, {
+        action,
+      });
+      return data;
+    } catch (error) {
+      console.error("Error liking/unliking blog post:", error);
+      throw error;
+    }
+  }
 }
 
 export const blogService = new BlogService();

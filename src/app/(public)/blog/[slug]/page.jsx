@@ -1,5 +1,4 @@
-// app/blog/[slug]/page.jsx
-'use client';
+"use client";
 
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -35,6 +34,25 @@ export default function BlogPostPage() {
     queryFn: () => blogService.getBlogBySlug(slug),
   });
 
+  // Initialize likes when post loads
+  useEffect(() => {
+    if (post) {
+      const backendLikes = post.likes || 0;
+      setLikes(backendLikes);
+
+      // Check if user has already liked this post locally
+      const liked = localStorage.getItem(`liked-${post._id}`);
+
+      // If localStorage says liked but backend count is 0, clear localStorage
+      if (liked && backendLikes === 0) {
+        localStorage.removeItem(`liked-${post._id}`);
+        setHasLiked(false);
+      } else if (liked) {
+        setHasLiked(true);
+      }
+    }
+  }, [post]);
+
   // Fetch related posts
   const { data: relatedPosts = [] } = useQuery({
     queryKey: ['related-posts', post?.categories],
@@ -62,6 +80,20 @@ export default function BlogPostPage() {
     } else {
       setLikes(prev => prev - 1);
       setHasLiked(false);
+    }
+
+    try {
+      await blogService.likeBlogPost(post._id, action);
+    } catch (error) {
+      // Revert on error
+      setHasLiked(!newHasLiked);
+      setLikes(likes);
+      if (!newHasLiked) {
+        localStorage.setItem(`liked-${post._id}`, "true");
+      } else {
+        localStorage.removeItem(`liked-${post._id}`);
+      }
+      console.error("Failed to like/unlike post:", error);
     }
   };
 
