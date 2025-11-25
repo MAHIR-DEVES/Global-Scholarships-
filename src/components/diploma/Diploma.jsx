@@ -1,120 +1,28 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { getAllScholarships } from '@/lib/scholarshipApi';
+import Link from 'next/link';
 
 const Diploma = () => {
-  const diplomaScholarships = [
-    {
-      id: 1,
-      university: 'University of Malaya',
-      logo: 'https://en.your-uni.com/assets/images/university/universiti-malaya-um.png',
-      country: 'Malaysia',
-      program: 'Diploma in Business Administration',
-      scholarship: '50%',
-      duration: '2 years',
-      deadline: '2024-08-15',
-      requirements: 'Minimum 3.0 GPA, IELTS 5.5',
-      rating: 4.8,
-      students: 250,
-    },
-    {
-      id: 2,
-      university: 'Taylors University',
-      logo: 'https://vectorseek.com/wp-content/uploads/2023/08/Taylors-University-Logo-Vector.svg-.png',
-      country: 'Malaysia',
-      program: 'Diploma in Computer Science',
-      scholarship: '60%',
-      duration: '2.5 years',
-      deadline: '2024-09-01',
-      requirements: 'Minimum 3.2 GPA, IELTS 6.0',
-      rating: 4.9,
-      students: 180,
-    },
-    {
-      id: 3,
-      university: 'Universiti Putra Malaysia',
-      logo: 'https://logodix.com/logo/1959380.png',
-      country: 'Malaysia',
-      program: 'Diploma in Engineering',
-      scholarship: '40%',
-      duration: '2 years',
-      deadline: '2024-07-20',
-      requirements: 'Minimum 3.0 GPA, IELTS 5.5',
-      rating: 4.7,
-      students: 320,
-    },
-    {
-      id: 4,
-      university: 'Beijing Normal University',
-      logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSojWKgTDPzMFta0K9SvPHbcJw7twmVP22eVA&s',
-      country: 'China',
-      program: 'Diploma in Chinese Language',
-      scholarship: '70%',
-      duration: '1.5 years',
-      deadline: '2024-08-30',
-      requirements: 'HSK Level 3, Minimum 2.8 GPA',
-      rating: 4.6,
-      students: 150,
-    },
-    {
-      id: 5,
-      university: 'Zhejiang University',
-      logo: 'https://www.zju.edu.cn/_upload/article/images/b3/3e/4d14d4c54f638bfeac3d775ce621/fffe781e-e322-42e4-bf42-7704b32a2e7a.png',
-      country: 'China',
-      program: 'Diploma in International Trade',
-      scholarship: '55%',
-      duration: '2 years',
-      deadline: '2024-09-15',
-      requirements: 'Minimum 3.0 GPA, IELTS 5.5',
-      rating: 4.8,
-      students: 200,
-    },
-    {
-      id: 6,
-      university: 'Universiti Sains Malaysia',
-      logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlYK7pcQAFNCd1I32McFtIGaCISuvHKJXnjQ&s',
-      country: 'Malaysia',
-      program: 'Diploma in Hospitality Management',
-      scholarship: '45%',
-      duration: '2 years',
-      deadline: '2024-08-25',
-      requirements: 'Minimum 2.8 GPA, IELTS 5.0',
-      rating: 4.5,
-      students: 280,
-    },
-    {
-      id: 7,
-      university: 'Fudan University',
-      logo: 'https://careers.aapt.org/getasset/660df083-246d-4b11-87c8-7d55b1e6347b/',
-      country: 'China',
-      program: 'Diploma in International Relations',
-      scholarship: '65%',
-      duration: '2 years',
-      deadline: '2024-09-10',
-      requirements: 'Minimum 3.2 GPA, IELTS 6.0',
-      rating: 4.9,
-      students: 120,
-    },
-    {
-      id: 8,
-      university: 'Universiti Teknologi Malaysia',
-      logo: 'https://civilexer.wordpress.com/wp-content/uploads/2011/03/utm-ibs.png?w=584',
-      country: 'Malaysia',
-      program: 'Diploma in Information Technology',
-      scholarship: '50%',
-      duration: '2.5 years',
-      deadline: '2024-08-18',
-      requirements: 'Minimum 3.0 GPA, IELTS 5.5',
-      rating: 4.7,
-      students: 220,
-    },
-  ];
+  const [diplomas, setDiplomas] = useState([]);
+
+  useEffect(() => {
+    const fetchDiploma = async () => {
+      try {
+        const data = await getAllScholarships({ level: 'diploma' });
+        setDiplomas(data.data);
+      } catch (error) {
+        console.error('Error fetching diploma scholarships:', error);
+      }
+    };
+
+    fetchDiploma();
+  }, []);
 
   const [showAll, setShowAll] = useState(false);
 
-  const visibleScholarships = showAll
-    ? diplomaScholarships
-    : diplomaScholarships.slice(0, 3);
+  const visibleScholarships = showAll ? diplomas : diplomas.slice(0, 3);
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-100 py-16 px-4 sm:px-6 lg:px-8">
@@ -132,39 +40,47 @@ const Diploma = () => {
         </div>
 
         {/* Scholarship Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {visibleScholarships.map(scholarship => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {visibleScholarships.map(sch => (
             <div
-              key={scholarship.id}
-              className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+              key={sch._id}
+              className="bg-white/80 backdrop-blur-xl rounded-md shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_10px_40px_rgb(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-2 border border-gray-100"
             >
+              {/* ---------- Top Badge ---------- */}
               <div className="relative">
-                <div className="absolute -top-4 -right-4 bg-gradient-to-r from-blue-500 to-cyan-400 text-white px-4 py-2 rounded-full shadow-lg z-10">
-                  <span className="font-bold text-lg">
-                    {scholarship.scholarship} Scholarship
+                <div className="absolute -top-5 right-4 bg-gradient-to-r from-blue-600 to-cyan-400 text-white px-5 py-2 rounded-full shadow-lg">
+                  <span className="font-bold text-base uppercase tracking-wide">
+                    {sch.level} Scholarship
                   </span>
                 </div>
+
+                {/* ---------- University Section ---------- */}
                 <div className="p-6 border-b border-gray-100">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 relative bg-gray-100 rounded-xl p-2">
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 relative rounded-xl overflow-hidden bg-gray-100 shadow-inner">
                       <Image
-                        src={scholarship.logo}
-                        alt={scholarship.university}
+                        src={
+                          sch.universityLogo &&
+                          sch.universityLogo.startsWith('http')
+                            ? sch.universityLogo
+                            : '/fallback.png'
+                        }
+                        alt={sch.universityName || 'University Logo'}
                         fill
                         className="object-contain rounded-lg"
                       />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-lg">
-                        {scholarship.university}
+
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-xl leading-tight">
+                        {sch.universityName}
                       </h3>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className="text-sm text-gray-500">
-                          {scholarship.country}
-                        </span>
+
+                      <div className="flex items-center gap-2 mt-1 text-sm">
+                        <span className="text-gray-500">{sch.country}</span>
                         <span className="text-yellow-500">★</span>
-                        <span className="text-sm text-gray-600">
-                          {scholarship.rating}
+                        <span className="text-gray-700">
+                          {sch.worldRanking}
                         </span>
                       </div>
                     </div>
@@ -172,45 +88,59 @@ const Diploma = () => {
                 </div>
               </div>
 
+              {/* ---------- Program Info ---------- */}
               <div className="p-6">
-                <h4 className="font-semibold text-gray-800 text-lg mb-2">
-                  {scholarship.program}
+                <h4 className="font-semibold text-gray-900 text-lg mb-2">
+                  {sch.majors?.[0]}
                 </h4>
-                <div className="space-y-3 mb-4">
-                  <div className="flex justify-between text-sm">
+
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
                     <span className="text-gray-600">Duration:</span>
+                    <span className="font-semibold">{sch.duration} Years</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Start Date:</span>
                     <span className="font-semibold">
-                      {scholarship.duration}
+                      {sch.applicationStartDate}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
+
+                  <div className="flex justify-between">
                     <span className="text-gray-600">Deadline:</span>
                     <span className="font-semibold text-red-600">
-                      {scholarship.deadline}
+                      {sch.applicationDeadline}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Students:</span>
-                    <span className="font-semibold">
-                      {scholarship.students}+ enrolled
-                    </span>
+
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Tuition Fee:</span>
+                    <span className="font-semibold">{sch.tuitionFee} USD</span>
                   </div>
                 </div>
 
-                <div className="bg-blue-50 rounded-lg p-3 mb-4">
-                  <h5 className="font-semibold text-blue-800 text-sm mb-1">
-                    Requirements:
+                {/* ---------- Requirements Box ---------- */}
+                <div className="mt-5 bg-blue-50/60 border border-blue-100 rounded-xl p-4 flex gap-2 items-center">
+                  <h5 className="font-semibold text-blue-800 mb-1">
+                    language Requirement
                   </h5>
-                  <p className="text-blue-700 text-xs">
-                    {scholarship.requirements}
+                  <p className="text-blue-700 text-sm leading-relaxed">
+                    {sch.languageRequirement}
                   </p>
                 </div>
 
-                <div className="flex space-x-3">
-                  <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
-                    Apply Now
-                  </button>
-                  <button className="px-4 py-2 border border-gray-300 hover:border-blue-600 text-gray-700 hover:text-blue-600 rounded-lg transition duration-300">
+                {/* ---------- Buttons ---------- */}
+                <div className="flex gap-4 mt-6">
+                  {/* Apply Now */}
+                  <Link href={sch.website} target="_blank" className="flex-1">
+                    <div className="w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-semibold py-2.5 rounded-xl transition-all cursor-pointer">
+                      Apply Now
+                    </div>
+                  </Link>
+
+                  {/* Details Button */}
+                  <button className="px-5 py-2.5 border border-gray-400 hover:border-blue-600 text-gray-700 hover:text-blue-600 rounded-xl transition-all">
                     Details
                   </button>
                 </div>
