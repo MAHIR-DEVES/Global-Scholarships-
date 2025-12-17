@@ -73,13 +73,21 @@ export default function BlogPostPage() {
     return Math.ceil(words / 200);
   };
 
-  const handleLike = () => {
-    if (!hasLiked) {
-      setLikes(prev => prev + 1);
-      setHasLiked(true);
+  const handleLike = async () => {
+    if (!post) return;
+
+    const newHasLiked = !hasLiked;
+    const newLikes = newHasLiked ? likes + 1 : Math.max(0, likes - 1);
+    const action = newHasLiked ? 'like' : 'unlike';
+
+    // Optimistic update
+    setHasLiked(newHasLiked);
+    setLikes(newLikes);
+
+    if (newHasLiked) {
+      localStorage.setItem(`liked-${post._id}`, 'true');
     } else {
-      setLikes(prev => prev - 1);
-      setHasLiked(false);
+      localStorage.removeItem(`liked-${post._id}`);
     }
 
     try {
@@ -89,11 +97,11 @@ export default function BlogPostPage() {
       setHasLiked(!newHasLiked);
       setLikes(likes);
       if (!newHasLiked) {
-        localStorage.setItem(`liked-${post._id}`, "true");
+        localStorage.setItem(`liked-${post._id}`, 'true');
       } else {
         localStorage.removeItem(`liked-${post._id}`);
       }
-      console.error("Failed to like/unlike post:", error);
+      console.error('Failed to like/unlike post:', error);
     }
   };
 

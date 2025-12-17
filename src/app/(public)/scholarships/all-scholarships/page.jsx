@@ -1,6 +1,7 @@
 'use client';
 import { getAllScholarships } from '@/lib/scholarshipApi';
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import DeadlineBadge from './DeadlineBadge';
 
 const ScholarshipsPage = () => {
@@ -231,12 +232,15 @@ const ScholarshipsPage = () => {
 
                   {/* RIGHT SIDE BUTTONS WITH ENHANCED STYLING */}
                   <div className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-0">
-                    <button className="px-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 font-medium flex items-center gap-2 group/btn">
+                    <Link
+                      href={`/scholarships/${sch._id}`}
+                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 font-medium flex items-center justify-center gap-2 group/btn"
+                    >
                       <span>View Details</span>
                       <span className="group-hover/btn:translate-x-1 transition-transform">
                         →
                       </span>
-                    </button>
+                    </Link>
 
                     <a
                       href={sch.website}

@@ -1,173 +1,84 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
+import { getAllScholarships, deleteScholarship } from '@/lib/scholarshipApi';
+import { FaEdit, FaTrash, FaEye, FaPlus } from 'react-icons/fa';
 
 const AllScholarshipsPage = () => {
+  const router = useRouter();
+  const [scholarships, setScholarships] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [levelFilter, setLevelFilter] = useState('all');
   const [countryFilter, setCountryFilter] = useState('all');
+  const [deleteModal, setDeleteModal] = useState({ show: false, id: null, name: '' });
 
-  // Sample scholarships data
-  const scholarships = [
-    {
-      id: 1,
-      title: 'Tsinghua University Full Scholarship',
-      university: 'Tsinghua University',
-      country: 'China',
-      level: 'Bachelor',
-      field: 'Computer Science',
-      amount: 'Full Tuition + Stipend',
-      deadline: '2024-08-15',
-      applications: 45,
-      status: 'active',
-      featured: true,
-      duration: '4 years',
-      eligibility: 'High School Diploma, IELTS 6.5',
-      created: '2024-01-10',
-    },
-    {
-      id: 2,
-      title: 'University of Malaya Merit Scholarship',
-      university: 'University of Malaya',
-      country: 'Malaysia',
-      level: 'Master',
-      field: 'Business Administration',
-      amount: '50% Tuition',
-      deadline: '2024-07-30',
-      applications: 32,
-      status: 'active',
-      featured: false,
-      duration: '2 years',
-      eligibility: 'Bachelor Degree, GPA 3.2',
-      created: '2024-01-15',
-    },
-    {
-      id: 3,
-      title: 'Peking University Research Grant',
-      university: 'Peking University',
-      country: 'China',
-      level: 'PhD',
-      field: 'Engineering',
-      amount: 'Full Funding + Research',
-      deadline: '2024-09-20',
-      applications: 28,
-      status: 'active',
-      featured: true,
-      duration: '3-5 years',
-      eligibility: 'Master Degree, Research Proposal',
-      created: '2024-01-08',
-    },
-    {
-      id: 4,
-      title: 'UPM International Student Award',
-      university: 'Universiti Putra Malaysia',
-      country: 'Malaysia',
-      level: 'Bachelor',
-      field: 'Agriculture',
-      amount: '30% Tuition',
-      deadline: '2024-06-15',
-      applications: 18,
-      status: 'active',
-      featured: false,
-      duration: '4 years',
-      eligibility: 'High School, IELTS 6.0',
-      created: '2024-01-20',
-    },
-    {
-      id: 5,
-      title: 'Zhejiang University Excellence Scholarship',
-      university: 'Zhejiang University',
-      country: 'China',
-      level: 'Master',
-      field: 'Medicine',
-      amount: '75% Tuition',
-      deadline: '2024-08-01',
-      applications: 41,
-      status: 'pending',
-      featured: false,
-      duration: '2 years',
-      eligibility: 'Bachelor in Medicine, IELTS 7.0',
-      created: '2024-01-12',
-    },
-    {
-      id: 6,
-      title: "Taylor's University Leadership Award",
-      university: "Taylor's University",
-      country: 'Malaysia',
-      level: 'Diploma',
-      field: 'Hospitality',
-      amount: '40% Tuition',
-      deadline: '2024-05-30',
-      applications: 22,
-      status: 'active',
-      featured: true,
-      duration: '2 years',
-      eligibility: 'Leadership Experience',
-      created: '2024-01-18',
-    },
-    {
-      id: 7,
-      title: 'Fudan University Cultural Exchange',
-      university: 'Fudan University',
-      country: 'China',
-      level: 'Bachelor',
-      field: 'International Relations',
-      amount: '60% Tuition',
-      deadline: '2024-07-20',
-      applications: 35,
-      status: 'active',
-      featured: false,
-      duration: '4 years',
-      eligibility: 'Cultural Activities, IELTS 6.5',
-      created: '2024-01-14',
-    },
-    {
-      id: 8,
-      title: 'USM STEM Scholarship',
-      university: 'Universiti Sains Malaysia',
-      country: 'Malaysia',
-      level: 'PhD',
-      field: 'Science & Technology',
-      amount: 'Full Tuition + Research',
-      deadline: '2024-10-15',
-      applications: 15,
-      status: 'expired',
-      featured: false,
-      duration: '3 years',
-      eligibility: 'Master in STEM, Publications',
-      created: '2023-12-05',
-    },
-  ];
+  // Fetch scholarships from API
+  useEffect(() => {
+    fetchScholarships();
+  }, []);
 
-  // Filter scholarships based on search and filters
-  const filteredScholarships = scholarships.filter(scholarship => {
-    const matchesSearch =
-      scholarship.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      scholarship.university.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      scholarship.field.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'all' || scholarship.status === statusFilter;
-    const matchesLevel =
-      levelFilter === 'all' || scholarship.level === levelFilter;
-    const matchesCountry =
-      countryFilter === 'all' || scholarship.country === countryFilter;
-
-    return matchesSearch && matchesStatus && matchesLevel && matchesCountry;
-  });
-
-  const getStatusColor = status => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'expired':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const fetchScholarships = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllScholarships({ limit: 100 });
+      setScholarships(data.data || []);
+    } catch (error) {
+      console.error('Error fetching scholarships:', error);
+      toast.error('Failed to load scholarships');
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Filter scholarships
+  const filteredScholarships = scholarships.filter(scholarship => {
+    const matchesSearch =
+      scholarship.universityName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      scholarship.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      scholarship.country?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLevel = levelFilter === 'all' || scholarship.level === levelFilter;
+    const matchesCountry = countryFilter === 'all' || scholarship.country === countryFilter;
+
+    return matchesSearch && matchesLevel && matchesCountry;
+  });
+
+  // Handle delete
+  const handleDeleteClick = (id, name) => {
+    setDeleteModal({ show: true, id, name });
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await deleteScholarship(deleteModal.id);
+      toast.success('Scholarship deleted successfully!');
+      setDeleteModal({ show: false, id: null, name: '' });
+      fetchScholarships(); // Refresh list
+    } catch (error) {
+      console.error('Error deleting scholarship:', error);
+      toast.error(error.message || 'Failed to delete scholarship');
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteModal({ show: false, id: null, name: '' });
+  };
+
+  //Handle edit
+  const handleEdit = (id) => {
+    router.push(`/dashboard/edit-scholarship/${id}`);
+  };
+
+  // Handle view
+  const handleView = (id) => {
+    router.push(`/scholarships/${id}`);
+  };
+
+  // Get unique values for filters
+  const countries = [...new Set(scholarships.map(s => s.country))].filter(Boolean);
+  const levels = [...new Set(scholarships.map(s => s.level))].filter(Boolean);
 
   const getLevelColor = level => {
     switch (level) {
@@ -184,18 +95,16 @@ const AllScholarshipsPage = () => {
     }
   };
 
-  const getAmountColor = amount => {
-    if (amount.includes('Full')) return 'text-green-600 font-bold';
-    if (amount.includes('75%') || amount.includes('60%'))
-      return 'text-blue-600 font-semibold';
-    if (amount.includes('50%') || amount.includes('40%'))
-      return 'text-purple-600 font-semibold';
-    return 'text-gray-600';
-  };
-
-  const countries = [...new Set(scholarships.map(s => s.country))];
-  const levels = [...new Set(scholarships.map(s => s.level))];
-  const statuses = ['active', 'pending', 'expired'];
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading scholarships...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-6">
@@ -208,25 +117,21 @@ const AllScholarshipsPage = () => {
                 All Scholarships
               </h1>
               <p className="text-gray-600">
-                Manage and track all scholarship opportunities for international
-                students
+                Manage and track all scholarship opportunities
               </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl hover:bg-gray-50 transition duration-200 flex items-center space-x-2">
-                <span>📊</span>
-                <span>Export Report</span>
-              </button>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition duration-200 flex items-center space-x-2">
-                <span>+</span>
-                <span>Add Scholarship</span>
-              </button>
-            </div>
+            <button
+              onClick={() => router.push('/dashboard/add-scholarships')}
+              className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition duration-200 flex items-center gap-2 font-medium"
+            >
+              <FaPlus className="w-4 h-4" />
+              Add New Scholarship
+            </button>
           </div>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -241,122 +146,50 @@ const AllScholarshipsPage = () => {
                 <span className="text-2xl">💰</span>
               </div>
             </div>
-            <div className="mt-2 text-sm text-green-600 font-medium">
-              +8 this month
-            </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">
-                  Active Scholarships
-                </p>
+                <p className="text-gray-500 text-sm font-medium">Countries</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">
-                  {scholarships.filter(s => s.status === 'active').length}
+                  {countries.length}
                 </p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">🎯</span>
+                <span className="text-2xl">🌍</span>
               </div>
-            </div>
-            <div className="mt-2 text-sm text-green-600 font-medium">
-              +5 new offers
             </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-500 text-sm font-medium">
-                  Total Applications
-                </p>
+                <p className="text-gray-500 text-sm font-medium">Study Levels</p>
                 <p className="text-3xl font-bold text-gray-900 mt-1">
-                  {scholarships.reduce((sum, s) => sum + s.applications, 0)}
+                  {levels.length}
                 </p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">📋</span>
+                <span className="text-2xl">🎓</span>
               </div>
-            </div>
-            <div className="mt-2 text-sm text-green-600 font-medium">
-              +23 this week
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm font-medium">
-                  Success Rate
-                </p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">92%</p>
-              </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">⭐</span>
-              </div>
-            </div>
-            <div className="mt-2 text-sm text-green-600 font-medium">
-              +3% improvement
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Insights */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Scholarship Insights
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-xl">
-              <div className="text-2xl font-bold text-blue-600">6</div>
-              <div className="text-sm text-gray-600">Featured Offers</div>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-xl">
-              <div className="text-2xl font-bold text-green-600">$2.8M</div>
-              <div className="text-sm text-gray-600">Total Value</div>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-xl">
-              <div className="text-2xl font-bold text-purple-600">12</div>
-              <div className="text-sm text-gray-600">Days Avg. Response</div>
-            </div>
-            <div className="text-center p-4 bg-orange-50 rounded-xl">
-              <div className="text-2xl font-bold text-orange-600">89%</div>
-              <div className="text-sm text-gray-600">Student Satisfaction</div>
             </div>
           </div>
         </div>
 
         {/* Filters and Search */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 gap-4">
             <div className="flex-1 max-w-md">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search scholarships by title, university, or field..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                  <span className="text-gray-400">🔍</span>
-                </div>
-              </div>
+              <input
+                type="text"
+                placeholder="Search scholarships by university, country..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+              />
             </div>
             <div className="flex flex-wrap gap-4">
-              <select
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-              >
-                <option value="all">All Status</option>
-                {statuses.map(status => (
-                  <option key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </option>
-                ))}
-              </select>
               <select
                 value={levelFilter}
                 onChange={e => setLevelFilter(e.target.value)}
@@ -392,25 +225,19 @@ const AllScholarshipsPage = () => {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Scholarship Details
+                    University
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    University & Country
+                    Country
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Level & Field
+                    Level
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Applications
+                    Tuition
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Deadline
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -418,144 +245,130 @@ const AllScholarshipsPage = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredScholarships.map(scholarship => (
-                  <tr
-                    key={scholarship.id}
-                    className="hover:bg-gray-50 transition duration-150"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-start space-x-3">
-                        {scholarship.featured && (
-                          <span className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold whitespace-nowrap">
-                            ⭐ FEATURED
-                          </span>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-gray-900 line-clamp-2">
-                            {scholarship.title}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            Duration: {scholarship.duration}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {scholarship.university}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {scholarship.country}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getLevelColor(
-                          scholarship.level
-                        )}`}
-                      >
-                        {scholarship.level}
-                      </span>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {scholarship.field}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div
-                        className={`text-sm font-semibold ${getAmountColor(
-                          scholarship.amount
-                        )}`}
-                      >
-                        {scholarship.amount}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {scholarship.applications}
-                      </div>
-                      <div className="text-xs text-gray-500">applications</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {scholarship.deadline}
-                      </div>
-                      <div className="text-xs text-gray-500">deadline</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          scholarship.status
-                        )}`}
-                      >
-                        {scholarship.status.charAt(0).toUpperCase() +
-                          scholarship.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900 px-2 py-1 rounded hover:bg-blue-50 transition duration-150">
-                          View
-                        </button>
-                        <button className="text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-50 transition duration-150">
-                          Edit
-                        </button>
+                {filteredScholarships.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-12 text-center">
+                      <div className="text-gray-500">
+                        <p className="text-lg font-medium mb-2">No scholarships found</p>
+                        <p className="text-sm">Try adjusting your search or filters</p>
                       </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredScholarships.map(scholarship => (
+                    <tr
+                      key={scholarship._id}
+                      className="hover:bg-gray-50 transition duration-150"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-start space-x-3">
+                          {scholarship.universityLogo && (
+                            <img
+                              src={scholarship.universityLogo}
+                              alt={scholarship.universityName}
+                              className="w-10 h-10 rounded-lg object-contain"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold text-gray-900 line-clamp-2">
+                              {scholarship.universityName}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1 line-clamp-1">
+                              {scholarship.description}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {scholarship.country}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getLevelColor(
+                            scholarship.level
+                          )}`}
+                        >
+                          {scholarship.level}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-semibold text-gray-900">
+                          {scholarship.tuitionFee}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {scholarship.applicationDeadline}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleView(scholarship._id)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition duration-150"
+                            title="View"
+                          >
+                            <FaEye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(scholarship._id)}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition duration-150"
+                            title="Edit"
+                          >
+                            <FaEdit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(scholarship._id, scholarship.universityName)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition duration-150"
+                            title="Delete"
+                          >
+                            <FaTrash className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
-
-          {/* Empty State */}
-          {filteredScholarships.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">💰</span>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No scholarships found
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Try adjusting your search or filters
-              </p>
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setStatusFilter('all');
-                  setLevelFilter('all');
-                  setCountryFilter('all');
-                }}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-              >
-                Clear filters
-              </button>
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* Footer Stats */}
-        <div className="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div>
-              <div className="text-2xl font-bold text-gray-900">15+</div>
-              <div className="text-gray-500 text-sm">Study Fields</div>
+      {/* Delete Confirmation Modal */}
+      {deleteModal.show && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 transform transition-all">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+              <FaTrash className="w-6 h-6 text-red-600" />
             </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">98%</div>
-              <div className="text-gray-500 text-sm">Application Success</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">24h</div>
-              <div className="text-gray-500 text-sm">Avg. Response Time</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-900">100%</div>
-              <div className="text-gray-500 text-sm">Verified Offers</div>
+            <h3 className="text-xl font-bold text-gray-900 text-center mb-2">
+              Delete Scholarship
+            </h3>
+            <p className="text-gray-600 text-center mb-6">
+              Are you sure you want to delete<br />
+              <span className="font-semibold text-gray-900">{deleteModal.name}</span>?<br />
+              This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={cancelDelete}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition duration-200 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition duration-200 font-medium"
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
