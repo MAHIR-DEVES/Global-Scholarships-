@@ -1,6 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+import { createScholarship } from '@/lib/scholarshipApi';
 import {
   FaPlus,
   FaTrash,
@@ -17,7 +19,8 @@ import {
 import { FaRankingStar } from 'react-icons/fa6';
 
 const AddScholarships = () => {
-  const [formData, setFormData] = useState({
+  const router = useRouter();
+  const [ formData, setFormData] = useState({
     universityName: '',
     country: '',
     description: '',
@@ -67,40 +70,36 @@ const AddScholarships = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/scholarships', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      const result = await createScholarship(formData);
+      toast.success(result.message || 'Scholarship created successfully!');
+
+      // Reset form
+      setFormData({
+        universityName: '',
+        country: '',
+        description: '',
+        universityLogo: '',
+        website: '',
+        contactEmail: '',
+        majors: [''],
+        videoUrl: '',
+        worldRanking: '',
+        level: '',
+        duration: '',
+        tuitionFee: '',
+        applicationDeadline: '',
+        applicationStartDate: '',
+        languageRequirement: '',
+        additionalInfo: '',
       });
 
-      const result = await res.json();
-
-      if (res.ok) {
-        toast.success(result.message);
-        setFormData({
-          universityName: '',
-          country: '',
-          description: '',
-          universityLogo: '',
-          website: '',
-          contactEmail: '',
-          majors: [''],
-          videoUrl: '',
-          worldRanking: '',
-          level: '',
-          duration: '',
-          tuitionFee: '',
-          applicationDeadline: '',
-          applicationStartDate: '',
-          languageRequirement: '',
-          additionalInfo: '',
-        });
-      } else {
-        toast.error(result.message || 'Something went wrong');
-      }
+      // Navigate to scholarships list after 1 second
+      setTimeout(() => {
+        router.push('/dashboard/scholarships');
+      }, 1000);
     } catch (error) {
       console.error(error);
-      toast.error('Failed to submit scholarship');
+      toast.error(error.message || 'Failed to create scholarship');
     } finally {
       setIsSubmitting(false);
     }

@@ -1,0 +1,645 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
+import { getScholarshipById, updateScholarship } from '@/lib/scholarshipApi';
+import {
+  FaPlus,
+  FaTrash,
+  FaUniversity,
+  FaGlobe,
+  FaGraduationCap,
+  FaDollarSign,
+  FaCalendar,
+  FaLanguage,
+  FaLink,
+  FaEnvelope,
+  FaPlay,
+  FaArrowLeft,
+} from 'react-icons/fa';
+import { FaRankingStar } from 'react-icons/fa6';
+
+const EditScholarship = () => {
+  const { id } = useParams();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    universityName: '',
+    country: '',
+    description: '',
+    universityLogo: '',
+    website: '',
+    contactEmail: '',
+    majors: [''],
+    videoUrl: '',
+    worldRanking: '',
+    level: '',
+    duration: '',
+    tuitionFee: '',
+    applicationDeadline: '',
+    applicationStartDate: '',
+    languageRequirement: '',
+    additionalInfo: '',
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeSection, setActiveSection] = useState('university');
+
+  // Fetch scholarship data
+  useEffect(() => {
+    const fetchScholarship = async () => {
+      try {
+        setLoading(true);
+        const data = await getScholarshipById(id);
+        setFormData({
+          universityName: data.universityName || '',
+          country: data.country || '',
+          description: data.description || '',
+          universityLogo: data.universityLogo || '',
+          website: data.website || '',
+          contactEmail: data.contactEmail || '',
+          majors: data.majors?.length > 0 ? data.majors : [''],
+          videoUrl: data.videoUrl || '',
+          worldRanking: data.worldRanking || '',
+          level: data.level || '',
+          duration: data.duration || '',
+          tuitionFee: data.tuitionFee || '',
+          applicationDeadline: data.applicationDeadline || '',
+          applicationStartDate: data.applicationStartDate || '',
+          languageRequirement: data.languageRequirement || '',
+          additionalInfo: data.additionalInfo || '',
+        });
+      } catch (error) {
+        console.error('Error fetching scholarship:', error);
+        toast.error('Failed to load scholarship data');
+        router.push('/dashboard/scholarships');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchScholarship();
+  }, [id, router]);
+
+  const handleChange = e => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleMajorsChange = (index, value) => {
+    const updatedMajors = [...formData.majors];
+    updatedMajors[index] = value;
+    setFormData({ ...formData, majors: updatedMajors });
+  };
+
+  const addMajor = () => {
+    setFormData({ ...formData, majors: [...formData.majors, ''] });
+  };
+
+  const removeMajor = index => {
+    if (formData.majors.length <= 1) return;
+    const updatedMajors = formData.majors.filter((_, i) => i !== index);
+    setFormData({ ...formData, majors: updatedMajors });
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const result = await updateScholarship(id, formData);
+      toast.success(result.message || 'Scholarship updated successfully!');
+
+      setTimeout(() => {
+        router.push('/dashboard/scholarships');
+      }, 1000);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || 'Failed to update scholarship');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const countries = [
+    'China',
+    'Malaysia',
+    'USA',
+    'UK',
+    'Canada',
+    'Australia',
+    'Germany',
+    'France',
+    'Japan',
+    'South Korea',
+  ];
+  const levels = ['Diploma', 'Bachelor', 'Master', 'PhD'];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading scholarship...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-8">
+      <div>
+        {/* Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => router.push('/dashboard/scholarships')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+          >
+            <FaArrowLeft className="w-4 h-4" />
+            <span>Back to Scholarships</span>
+          </button>
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">
+            Edit Scholarship
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Update scholarship information
+          </p>
+        </div>
+
+        {/* Progress Navigation */}
+        <div className="bg-white rounded-xs shadow-sm border border-gray-100 p-2 mb-8">
+          <div className="flex flex-wrap gap-2">
+            {[
+              {
+                id: 'university',
+                label: 'University Info',
+                icon: FaUniversity,
+              },
+              {
+                id: 'program',
+                label: 'Program Details',
+                icon: FaGraduationCap,
+              },
+              { id: 'application', label: 'Application', icon: FaCalendar },
+            ].map(section => (
+              <button
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                className={`flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
+                  activeSection === section.id
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <section.icon className="w-4 h-4" />
+                <span>{section.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-xs shadow-xs border border-gray-100 overflow-hidden"
+        >
+          {/* University Information Section */}
+          {activeSection === 'university' && (
+            <div className="p-6 sm:p-8 space-y-8">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <FaUniversity className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    University Information
+                  </h2>
+                  <p className="text-gray-600">
+                    Basic details about the university
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* University Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    University Name *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="universityName"
+                      value={formData.universityName}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="Enter university name"
+                      required
+                    />
+                    <FaUniversity className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Country */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Country *
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 appearance-none"
+                      required
+                    >
+                      <option value="">Select Country</option>
+                      {countries.map(country => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
+                    </select>
+                    <FaGlobe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* World Ranking */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    World Ranking
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="worldRanking"
+                      value={formData.worldRanking}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="e.g., #150 QS Ranking"
+                    />
+                    <FaRankingStar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* University Logo */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    University Logo URL
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="universityLogo"
+                      value={formData.universityLogo}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="https://example.com/logo.png"
+                    />
+                    <FaLink className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Website */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Website
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="website"
+                      value={formData.website}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="https://university.edu"
+                    />
+                    <FaLink className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Contact Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Contact Email
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      name="contactEmail"
+                      value={formData.contactEmail}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="admissions@university.edu"
+                    />
+                    <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Video URL */}
+                <div className="lg:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Campus Tour Video URL
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="videoUrl"
+                      value={formData.videoUrl}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="https://youtube.com/embed/campus-tour"
+                    />
+                    <FaPlay className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="lg:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    University Description *
+                  </label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 resize-none"
+                    rows="4"
+                    placeholder="Describe the university, its facilities, and academic excellence..."
+                    required
+                  ></textarea>
+                </div>
+
+                {/* Majors */}
+                <div className="lg:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Available Majors
+                  </label>
+                  <div className="space-y-3">
+                    {formData.majors.map((major, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            value={major}
+                            onChange={e =>
+                              handleMajorsChange(index, e.target.value)
+                            }
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                            placeholder="Enter major name (e.g., Computer Science)"
+                          />
+                        </div>
+                        {formData.majors.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeMajor(index)}
+                            className="p-3 text-red-600 hover:bg-red-50 rounded-xl transition duration-200"
+                          >
+                            <FaTrash className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addMajor}
+                      className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      <FaPlus className="w-4 h-4" />
+                      <span>Add Another Major</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveSection('program')}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition duration-200 font-medium shadow-lg hover:shadow-xl"
+                >
+                  Next: Program Details
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Program Details Section */}
+          {activeSection === 'program' && (
+            <div className="p-6 sm:p-8 space-y-8">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                  <FaGraduationCap className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Program Details
+                  </h2>
+                  <p className="text-gray-600">Academic program information</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Program Level */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Program Level *
+                  </label>
+                  <select
+                    name="level"
+                    value={formData.level}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    required
+                  >
+                    <option value="">Select Level</option>
+                    {levels.map(level => (
+                      <option key={level} value={level}>
+                        {level}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Duration */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Duration *
+                  </label>
+                  <input
+                    type="text"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                    placeholder="e.g., 4 years, 2 semesters"
+                    required
+                  />
+                </div>
+
+                {/* Tuition Fee */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tuition Fee *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="tuitionFee"
+                      value={formData.tuitionFee}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="$15,000 per year"
+                      required
+                    />
+                    <FaDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Language Requirement */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Language Requirement
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="languageRequirement"
+                      value={formData.languageRequirement}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="IELTS 6.5 or TOEFL 80"
+                    />
+                    <FaLanguage className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Additional Info */}
+                <div className="lg:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Additional Program Information
+                  </label>
+                  <textarea
+                    name="additionalInfo"
+                    value={formData.additionalInfo}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 resize-none"
+                    rows="4"
+                    placeholder="Scholarship coverage, eligibility criteria, benefits, etc."
+                  ></textarea>
+                </div>
+              </div>
+
+              <div className="flex justify-between pt-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveSection('university')}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition duration-200 font-medium"
+                >
+                  Back to University Info
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSection('application')}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition duration-200 font-medium shadow-lg hover:shadow-xl"
+                >
+                  Next: Application Details
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Application Details Section */}
+          {activeSection === 'application' && (
+            <div className="p-6 sm:p-8 space-y-8">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <FaCalendar className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Application Details
+                  </h2>
+                  <p className="text-gray-600">
+                    Deadlines and application process
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Application Start Date */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Application Start Date *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="applicationStartDate"
+                      value={formData.applicationStartDate}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="e.g., January 15, 2025"
+                      required
+                    />
+                    <FaCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+
+                {/* Application Deadline */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Application Deadline *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="applicationDeadline"
+                      value={formData.applicationDeadline}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                      placeholder="e.g., August 30, 2025"
+                      required
+                    />
+                    <FaCalendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between pt-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveSection('program')}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition duration-200 font-medium"
+                >
+                  Back to Program Details
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-3 rounded-xl hover:from-green-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaPlus className="w-4 h-4" />
+                      <span>Update Scholarship</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default EditScholarship;
