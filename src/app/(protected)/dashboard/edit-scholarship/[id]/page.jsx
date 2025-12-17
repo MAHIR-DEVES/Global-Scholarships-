@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
-import { createScholarship } from '@/lib/scholarshipApi';
+import { getScholarshipById, updateScholarship } from '@/lib/scholarshipApi';
 import {
   FaPlus,
   FaTrash,
@@ -15,12 +16,15 @@ import {
   FaLink,
   FaEnvelope,
   FaPlay,
+  FaArrowLeft,
 } from 'react-icons/fa';
 import { FaRankingStar } from 'react-icons/fa6';
 
-const AddScholarships = () => {
+const EditScholarship = () => {
+  const { id } = useParams();
   const router = useRouter();
-  const [ formData, setFormData] = useState({
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
     universityName: '',
     country: '',
     description: '',
@@ -41,6 +45,42 @@ const AddScholarships = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeSection, setActiveSection] = useState('university');
+
+  // Fetch scholarship data
+  useEffect(() => {
+    const fetchScholarship = async () => {
+      try {
+        setLoading(true);
+        const data = await getScholarshipById(id);
+        setFormData({
+          universityName: data.universityName || '',
+          country: data.country || '',
+          description: data.description || '',
+          universityLogo: data.universityLogo || '',
+          website: data.website || '',
+          contactEmail: data.contactEmail || '',
+          majors: data.majors?.length > 0 ? data.majors : [''],
+          videoUrl: data.videoUrl || '',
+          worldRanking: data.worldRanking || '',
+          level: data.level || '',
+          duration: data.duration || '',
+          tuitionFee: data.tuitionFee || '',
+          applicationDeadline: data.applicationDeadline || '',
+          applicationStartDate: data.applicationStartDate || '',
+          languageRequirement: data.languageRequirement || '',
+          additionalInfo: data.additionalInfo || '',
+        });
+      } catch (error) {
+        console.error('Error fetching scholarship:', error);
+        toast.error('Failed to load scholarship data');
+        router.push('/dashboard/scholarships');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchScholarship();
+  }, [id, router]);
 
   const handleChange = e => {
     setFormData({
@@ -70,36 +110,15 @@ const AddScholarships = () => {
     setIsSubmitting(true);
 
     try {
-      const result = await createScholarship(formData);
-      toast.success(result.message || 'Scholarship created successfully!');
+      const result = await updateScholarship(id, formData);
+      toast.success(result.message || 'Scholarship updated successfully!');
 
-      // Reset form
-      setFormData({
-        universityName: '',
-        country: '',
-        description: '',
-        universityLogo: '',
-        website: '',
-        contactEmail: '',
-        majors: [''],
-        videoUrl: '',
-        worldRanking: '',
-        level: '',
-        duration: '',
-        tuitionFee: '',
-        applicationDeadline: '',
-        applicationStartDate: '',
-        languageRequirement: '',
-        additionalInfo: '',
-      });
-
-      // Navigate to scholarships list after 1 second
       setTimeout(() => {
         router.push('/dashboard/scholarships');
       }, 1000);
     } catch (error) {
       console.error(error);
-      toast.error(error.message || 'Failed to create scholarship');
+      toast.error(error.message || 'Failed to update scholarship');
     } finally {
       setIsSubmitting(false);
     }
@@ -119,17 +138,34 @@ const AddScholarships = () => {
   ];
   const levels = ['Diploma', 'Bachelor', 'Master', 'PhD'];
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading scholarship...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className=" py-8">
-      <div className="">
+    <div className="py-8">
+      <div>
         {/* Header */}
         <div className="mb-8">
+          <button
+            onClick={() => router.push('/dashboard/scholarships')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
+          >
+            <FaArrowLeft className="w-4 h-4" />
+            <span>Back to Scholarships</span>
+          </button>
           <h1 className="text-4xl font-bold text-gray-900 mb-3">
-            Add New Scholarship
+            Edit Scholarship
           </h1>
-          <p className="text-gray-600 text-lg ">
-            Create comprehensive scholarship opportunities for international
-            students
+          <p className="text-gray-600 text-lg">
+            Update scholarship information
           </p>
         </div>
 
@@ -580,66 +616,30 @@ const AddScholarships = () => {
                 >
                   Back to Program Details
                 </button>
-                <div className="flex space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setActiveSection('university')}
-                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition duration-200 font-medium"
-                  >
-                    Save as Draft
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-3 rounded-xl hover:from-green-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>Submitting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <FaPlus className="w-4 h-4" />
-                        <span>Create Scholarship</span>
-                      </>
-                    )}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-3 rounded-xl hover:from-green-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Updating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaPlus className="w-4 h-4" />
+                      <span>Update Scholarship</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           )}
         </form>
-
-        {/* Quick Tips */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xs p-6">
-          <h3 className="text-sm font-semibold text-blue-900 mb-3 flex items-center">
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Scholarship Creation Tips
-          </h3>
-          <ul className="text-sm text-blue-800 space-y-2">
-            <li>• Provide accurate and up-to-date university information</li>
-            <li>
-              • Include all available majors to attract diverse applicants
-            </li>
-            <li>• Clearly state scholarship benefits and coverage</li>
-            <li>• Set realistic application deadlines</li>
-            <li>• Include contact information for student inquiries</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
 };
 
-export default AddScholarships;
+export default EditScholarship;
